@@ -17,6 +17,23 @@ TEST_CASE("Test prepared statements in C API", "[capi]") {
 	REQUIRE(status == DuckDBSuccess);
 	REQUIRE(stmt != nullptr);
 
+	auto column_count = duckdb_prepared_column_count(stmt);
+	REQUIRE(column_count == 1);
+
+	auto column_name = duckdb_prepared_column_name(stmt, 0);
+	REQUIRE(strcmp(column_name, "CAST($1 AS BIGINT)") == 0);
+
+	column_name = duckdb_prepared_column_name(stmt, 1);
+	REQUIRE(column_name == nullptr);
+
+	auto column_type = duckdb_prepared_column_logical_type(stmt, 0);
+	REQUIRE(column_type != nullptr);
+	REQUIRE(duckdb_get_type_id(column_type) == DUCKDB_TYPE_BIGINT);
+	duckdb_destroy_logical_type(&column_type);
+
+	column_type = duckdb_prepared_column_logical_type(stmt, 1);
+	REQUIRE(column_type == nullptr);
+
 	status = duckdb_bind_boolean(stmt, 1, true);
 	REQUIRE(status == DuckDBSuccess);
 

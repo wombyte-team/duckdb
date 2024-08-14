@@ -85,6 +85,52 @@ const char *duckdb_prepare_error(duckdb_prepared_statement prepared_statement) {
 	return wrapper->statement->error.Message().c_str();
 }
 
+idx_t duckdb_prepared_column_count(duckdb_prepared_statement prepared_statement) {
+	auto wrapper = reinterpret_cast<PreparedStatementWrapper *>(prepared_statement);
+	if (!wrapper || !wrapper->statement || wrapper->statement->HasError()) {
+		return 0;
+	}
+
+	return wrapper->statement->ColumnCount();
+}
+
+duckdb_logical_type duckdb_prepared_column_logical_type(duckdb_prepared_statement prepared_statement, idx_t col) {
+	auto wrapper = reinterpret_cast<PreparedStatementWrapper *>(prepared_statement);
+	if (!wrapper || !wrapper->statement || wrapper->statement->HasError()) {
+		return nullptr;
+	}
+
+	auto types = wrapper->statement->GetTypes();
+	if (col >= types.size()) {
+		return nullptr;
+	}
+
+	return reinterpret_cast<duckdb_logical_type>(new duckdb::LogicalType(types[col]));
+}
+
+static duckdb::string duckdb_prepared_column_name_internal(duckdb_prepared_statement prepared_statement, idx_t col_idx) {
+	auto wrapper = reinterpret_cast<PreparedStatementWrapper *>(prepared_statement);
+	if (!wrapper || !wrapper->statement || wrapper->statement->HasError()) {
+		return duckdb::string();
+	}
+
+	if (col_idx >= wrapper->statement->ColumnCount()) {
+		return duckdb::string();
+	}
+
+	auto &names = wrapper->statement->GetNames();
+	return names[col_idx];
+}
+
+const char *duckdb_prepared_column_name(duckdb_prepared_statement prepared_statement, idx_t col_idx) {
+	auto identifier = duckdb_prepared_column_name_internal(prepared_statement, col_idx);
+	if (identifier == duckdb::string()) {
+		return NULL;
+	}
+
+	return strdup(identifier.c_str());
+}
+
 idx_t duckdb_nparams(duckdb_prepared_statement prepared_statement) {
 	auto wrapper = reinterpret_cast<PreparedStatementWrapper *>(prepared_statement);
 	if (!wrapper || !wrapper->statement || wrapper->statement->HasError()) {

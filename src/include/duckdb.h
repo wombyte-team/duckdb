@@ -1276,6 +1276,33 @@ The error message should not be freed. It will be de-allocated when `duckdb_dest
 DUCKDB_API const char *duckdb_prepare_error(duckdb_prepared_statement prepared_statement);
 
 /*!
+Returns the number of columns in the result of the prepared statement.
+
+* prepared_statement: The prepared statement to obtain the number of columns for.
+*/
+DUCKDB_API idx_t duckdb_prepared_column_count(duckdb_prepared_statement prepared_statement);
+
+/*!
+Returns the logical type of the column at the specified index.
+
+The return type of this call should be destroyed with `duckdb_destroy_logical_type`.
+
+Returns `NULL` if the column is out of range.
+
+* prepared_statement: The prepared statement to obtain the column type from.
+* col: The column index.
+*/
+DUCKDB_API duckdb_logical_type duckdb_prepared_column_logical_type(duckdb_prepared_statement prepared_statement, idx_t col);
+	
+/*!
+Returns the name of the column at the specified index.
+
+* prepared_statement: The prepared statement to obtain the column name from.
+* col: The column index.
+*/
+DUCKDB_API const char *duckdb_prepared_column_name(duckdb_prepared_statement prepared_statement, idx_t col);
+
+/*!
 Returns the number of parameters that can be provided to the given prepared statement.
 
 Returns 0 if the query was not successfully prepared.
