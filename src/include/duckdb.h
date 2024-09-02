@@ -191,6 +191,22 @@ typedef enum {
 	DUCKDB_STATEMENT_TYPE_MULTI = 27,
 } duckdb_statement_type;
 
+//! An enum over DuckDB's different transaction types.
+typedef enum {
+	DUCKDB_TRANSACTION_TYPE_INVALID = 0,
+	DUCKDB_TRANSACTION_TYPE_BEGIN = 1,
+	DUCKDB_TRANSACTION_TYPE_COMMIT = 2,
+	DUCKDB_TRANSACTION_TYPE_ROLLBACK = 3,
+} duckdb_transaction_type;
+
+//! An enum over DuckDB's different transaction states.
+typedef enum {
+	DUCKDB_TRANSACTION_STATE_INVALID = 0,
+	DUCKDB_TRANSACTION_STATE_NONE = 1,
+	DUCKDB_TRANSACTION_STATE_ACTIVE = 2,
+	DUCKDB_TRANSACTION_STATE_FAILED = 3,
+} duckdb_transaction_state;
+
 //===--------------------------------------------------------------------===//
 // General type definitions
 //===--------------------------------------------------------------------===//
@@ -565,6 +581,14 @@ Get progress of the running query
 * returns: -1 if no progress or a percentage of the progress
 */
 DUCKDB_API duckdb_query_progress_type duckdb_query_progress(duckdb_connection connection);
+
+/*!
+Returns the transaction state of the specified connection.
+
+* connection: The connection to get the transaction state from.
+* returns: The transaction state of the specified connection or `DUCKDB_TRANSACTION_STATE_INVALID` on failure.
+*/
+DUCKDB_API duckdb_transaction_state duckdb_get_transaction_state(duckdb_connection connection);
 
 /*!
 Closes the specified connection and de-allocates all memory allocated for that connection.
@@ -1293,7 +1317,7 @@ Returns `NULL` if the column is out of range.
 * col: The column index.
 */
 DUCKDB_API duckdb_logical_type duckdb_prepared_column_logical_type(duckdb_prepared_statement prepared_statement, idx_t col);
-	
+
 /*!
 Returns the name of the column at the specified index.
 
@@ -1344,6 +1368,14 @@ Returns the statement type of the statement to be executed
  * returns: duckdb_statement_type value or DUCKDB_STATEMENT_TYPE_INVALID
  */
 DUCKDB_API duckdb_statement_type duckdb_prepared_statement_type(duckdb_prepared_statement statement);
+
+/*!
+Returns the transaction type of the statement to be executed
+
+ * statement: The prepared statement.
+ * returns: duckdb_transaction_type value or DUCKDB_TRANSACTION_TYPE_INVALID
+ */
+DUCKDB_API duckdb_transaction_type duckdb_prepared_transaction_type(duckdb_prepared_statement statement);
 
 //===--------------------------------------------------------------------===//
 // Bind Values to Prepared Statements

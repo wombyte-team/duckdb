@@ -88,6 +88,23 @@ duckdb_query_progress_type duckdb_query_progress(duckdb_connection connection) {
 	return query_progress_type;
 }
 
+duckdb_transaction_state duckdb_get_transaction_state(duckdb_connection connection) {
+	if (!connection) {
+		return DUCKDB_TRANSACTION_STATE_INVALID;
+	}
+
+	auto *conn = reinterpret_cast<Connection *>(connection);
+	if (conn->HasActiveTransaction()) {
+		if (conn->IsTransactionInvalidated()) {
+			return DUCKDB_TRANSACTION_STATE_FAILED;
+		}
+
+		return DUCKDB_TRANSACTION_STATE_ACTIVE;
+	}
+
+	return DUCKDB_TRANSACTION_STATE_NONE;
+}
+
 void duckdb_disconnect(duckdb_connection *connection) {
 	if (connection && *connection) {
 		Connection *conn = reinterpret_cast<Connection *>(*connection);

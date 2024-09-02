@@ -313,4 +313,9 @@ bool Connection::HasActiveTransaction() {
 	return context->transaction.HasActiveTransaction();
 }
 
+bool Connection::IsTransactionInvalidated() const {
+	auto &transaction = context->transaction.ActiveTransaction();
+	return transaction.transaction_validity.IsInvalidated();
+}
+
 } // namespace duckdb

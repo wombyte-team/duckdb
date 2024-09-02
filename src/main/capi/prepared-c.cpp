@@ -5,6 +5,7 @@
 #include "duckdb/common/uhugeint.hpp"
 #include "duckdb/common/optional_ptr.hpp"
 #include "duckdb/common/case_insensitive_map.hpp"
+#include "duckdb/parser/statement/transaction_statement.hpp"
 
 using duckdb::case_insensitive_map_t;
 using duckdb::Connection;
@@ -400,6 +401,39 @@ duckdb_statement_type duckdb_prepared_statement_type(duckdb_prepared_statement s
 	auto stmt = reinterpret_cast<PreparedStatementWrapper *>(statement);
 
 	return StatementTypeToC(stmt->statement->GetStatementType());
+}
+
+duckdb_transaction_type duckdb_prepared_transaction_type(duckdb_prepared_statement statement) {
+	if (!statement) {
+		return DUCKDB_TRANSACTION_TYPE_INVALID;
+	}
+
+	auto wrapper = reinterpret_cast<PreparedStatementWrapper *>(statement);
+	auto data = wrapper->statement->data;
+	if (data == nullptr || data->unbound_statement == nullptr) {
+		return DUCKDB_TRANSACTION_TYPE_INVALID;
+	}
+
+	auto stmt = data->unbound_statement.get();
+	if (stmt == nullptr || stmt->type != duckdb::StatementType::TRANSACTION_STATEMENT) {
+		return DUCKDB_TRANSACTION_TYPE_INVALID;
+	}
+
+	auto transaction_stmt = &stmt->Cast<duckdb::TransactionStatement>();
+	if (transaction_stmt == nullptr) {
+		return DUCKDB_TRANSACTION_TYPE_INVALID;
+	}
+
+	switch (transaction_stmt->info->type) {
+	case duckdb::TransactionType::BEGIN_TRANSACTION:
+		return DUCKDB_TRANSACTION_TYPE_BEGIN;
+	case duckdb::TransactionType::COMMIT:
+		return DUCKDB_TRANSACTION_TYPE_COMMIT;
+	case duckdb::TransactionType::ROLLBACK:
+		return DUCKDB_TRANSACTION_TYPE_ROLLBACK;
+	default:
+		return DUCKDB_TRANSACTION_TYPE_INVALID;
+	}
 }
 
 template <class T>
