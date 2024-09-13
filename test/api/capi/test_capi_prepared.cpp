@@ -22,9 +22,11 @@ TEST_CASE("Test prepared statements in C API", "[capi]") {
 
 	auto column_name = duckdb_prepared_column_name(stmt, 0);
 	REQUIRE(strcmp(column_name, "CAST($1 AS BIGINT)") == 0);
+	duckdb_free((void *)column_name);
 
 	column_name = duckdb_prepared_column_name(stmt, 1);
 	REQUIRE(column_name == nullptr);
+	duckdb_free((void *)column_name);
 
 	auto column_type = duckdb_prepared_column_logical_type(stmt, 0);
 	REQUIRE(column_type != nullptr);
@@ -580,7 +582,6 @@ TEST_CASE("Test transaction statement type (commit)", "[capi]") {
 	REQUIRE(duckdb_prepare(conn, "SELECT * FROM hello", &stmt) == DuckDBSuccess);
 }
 
-
 TEST_CASE("Test transaction statement type (error)", "[capi]") {
 	duckdb_database db;
 	duckdb_connection conn;
@@ -614,4 +615,3 @@ TEST_CASE("Test transaction statement type (error)", "[capi]") {
 
 	REQUIRE(duckdb_prepare(conn, "SELECT * FROM hello", &stmt) == DuckDBError);
 }
-

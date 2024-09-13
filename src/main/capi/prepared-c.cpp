@@ -109,7 +109,8 @@ duckdb_logical_type duckdb_prepared_column_logical_type(duckdb_prepared_statemen
 	return reinterpret_cast<duckdb_logical_type>(new duckdb::LogicalType(types[col]));
 }
 
-static duckdb::string duckdb_prepared_column_name_internal(duckdb_prepared_statement prepared_statement, idx_t col_idx) {
+static duckdb::string duckdb_prepared_column_name_internal(duckdb_prepared_statement prepared_statement,
+                                                           idx_t col_idx) {
 	auto wrapper = reinterpret_cast<PreparedStatementWrapper *>(prepared_statement);
 	if (!wrapper || !wrapper->statement || wrapper->statement->HasError()) {
 		return duckdb::string();

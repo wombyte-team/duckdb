@@ -1482,7 +1482,8 @@ Returns `NULL` if the column is out of range.
 * prepared_statement: The prepared statement to obtain the column type from.
 * col: The column index.
 */
-DUCKDB_API duckdb_logical_type duckdb_prepared_column_logical_type(duckdb_prepared_statement prepared_statement, idx_t col);
+DUCKDB_API duckdb_logical_type duckdb_prepared_column_logical_type(duckdb_prepared_statement prepared_statement,
+                                                                   idx_t col);
 
 /*!
 Returns the name of the column at the specified index.
