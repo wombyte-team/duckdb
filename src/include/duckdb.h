@@ -229,7 +229,6 @@ typedef enum duckdb_error_type {
 } duckdb_error_type;
 //! An enum over DuckDB's different cast modes.
 typedef enum duckdb_cast_mode { DUCKDB_CAST_NORMAL = 0, DUCKDB_CAST_TRY = 1 } duckdb_cast_mode;
-
 //! An enum over DuckDB's different transaction types.
 typedef enum {
 	DUCKDB_TRANSACTION_TYPE_INVALID = 0,
@@ -237,7 +236,6 @@ typedef enum {
 	DUCKDB_TRANSACTION_TYPE_COMMIT = 2,
 	DUCKDB_TRANSACTION_TYPE_ROLLBACK = 3,
 } duckdb_transaction_type;
-
 //! An enum over DuckDB's different transaction states.
 typedef enum {
 	DUCKDB_TRANSACTION_STATE_INVALID = 0,
@@ -720,8 +718,8 @@ DUCKDB_API duckdb_query_progress_type duckdb_query_progress(duckdb_connection co
 /*!
 Returns the transaction state of the specified connection.
 
-* connection: The connection to get the transaction state from.
-* returns: The transaction state of the specified connection or `DUCKDB_TRANSACTION_STATE_INVALID` on failure.
+* @param connection The connection to get the transaction state from.
+* @return The transaction state of the specified connection or `DUCKDB_TRANSACTION_STATE_INVALID` on failure.
 */
 DUCKDB_API duckdb_transaction_state duckdb_get_transaction_state(duckdb_connection connection);
 
@@ -1468,7 +1466,8 @@ DUCKDB_API const char *duckdb_prepare_error(duckdb_prepared_statement prepared_s
 /*!
 Returns the number of columns in the result of the prepared statement.
 
-* prepared_statement: The prepared statement to obtain the number of columns for.
+* @param prepared_statement The prepared statement to obtain the number of columns for.
+* @return The number of columns in the result of the prepared statement.
 */
 DUCKDB_API idx_t duckdb_prepared_column_count(duckdb_prepared_statement prepared_statement);
 
@@ -1479,8 +1478,9 @@ The return type of this call should be destroyed with `duckdb_destroy_logical_ty
 
 Returns `NULL` if the column is out of range.
 
-* prepared_statement: The prepared statement to obtain the column type from.
-* col: The column index.
+* @param prepared_statement The prepared statement to obtain the column type from.
+* @param col The column index.
+* @return The logical column type of the specified column.
 */
 DUCKDB_API duckdb_logical_type duckdb_prepared_column_logical_type(duckdb_prepared_statement prepared_statement,
                                                                    idx_t col);
@@ -1488,8 +1488,9 @@ DUCKDB_API duckdb_logical_type duckdb_prepared_column_logical_type(duckdb_prepar
 /*!
 Returns the name of the column at the specified index.
 
-* prepared_statement: The prepared statement to obtain the column name from.
-* col: The column index.
+* @param prepared_statement The prepared statement to obtain the column name from.
+* @param col The column index.
+* @return The column name of the specified column.
 */
 DUCKDB_API const char *duckdb_prepared_column_name(duckdb_prepared_statement prepared_statement, idx_t col);
 
@@ -1539,8 +1540,8 @@ DUCKDB_API duckdb_statement_type duckdb_prepared_statement_type(duckdb_prepared_
 /*!
 Returns the transaction type of the statement to be executed
 
- * statement: The prepared statement.
- * returns: duckdb_transaction_type value or DUCKDB_TRANSACTION_TYPE_INVALID
+ * @param statement The prepared statement.
+ * @return duckdb_transaction_type value or DUCKDB_TRANSACTION_TYPE_INVALID
  */
 DUCKDB_API duckdb_transaction_type duckdb_prepared_transaction_type(duckdb_prepared_statement statement);
 
