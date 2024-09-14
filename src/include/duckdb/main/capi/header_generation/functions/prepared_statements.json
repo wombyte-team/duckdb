@@ -150,6 +150,85 @@
                 },
                 "return_value": "duckdb_statement_type value or DUCKDB_STATEMENT_TYPE_INVALID"
             }
+        },
+        {
+            "name": "duckdb_prepared_transaction_type",
+            "return_type": "duckdb_transaction_type",
+            "params": [
+                {
+                    "type": "duckdb_prepared_statement",
+                    "name": "statement"
+                }
+            ],
+            "comment": {
+                "description": "Returns the transaction type of the statement to be executed\n\n",
+                "param_comments": {
+                    "statement": "The prepared statement."
+                },
+                "return_value": "duckdb_transaction_type value or DUCKDB_TRANSACTION_TYPE_INVALID"
+            }
+        },
+        {
+            "name": "duckdb_prepared_column_name",
+            "return_type": "const char *",
+            "params": [
+                {
+                    "type": "duckdb_prepared_statement",
+                    "name": "prepared_statement"
+                },
+                {
+                    "type": "idx_t",
+                    "name": "col"
+                }
+            ],
+            "comment": {
+                "description": "Returns the name of the column at the specified index\n\n",
+                "param_comments": {
+                    "prepared_statement": "The prepared statement.",
+                    "col": "The column index."
+                },
+                "return_value": "The column name of the specified index."
+            }
+        },
+
+        {
+            "name": "duckdb_prepared_column_logical_type",
+            "return_type": "duckdb_logical_type",
+            "params": [
+                {
+                    "type": "duckdb_prepared_statement",
+                    "name": "prepared_statement"
+                },
+                {
+                    "type": "idx_t",
+                    "name": "col"
+                }
+            ],
+            "comment": {
+                "description": "Returns the logical type of the column at the specified index\n\nThe return type of this call should be destroyed with `duckdb_destroy_logical_type`.\n\nReturns `NULL` if the column is out of range.\n\n",
+                "param_comments": {
+                    "prepared_statement": "The prepared statement.",
+                    "col": "The column index."
+                },
+                "return_value": "The logical type of the specified index."
+            }
+        },
+        {
+            "name": "duckdb_prepared_column_count",
+            "return_type": "idx_t",
+            "params": [
+                {
+                    "type": "duckdb_prepared_statement",
+                    "name": "prepared_statement"
+                }
+            ],
+            "comment": {
+                "description": "Returns the number of columns in the result set of the prepared statement.\n\n",
+                "param_comments": {
+                    "prepared_statement": "The prepared statement."
+                },
+                "return_value": "The number of columns in the result set."
+            }
         }
     ]
 }

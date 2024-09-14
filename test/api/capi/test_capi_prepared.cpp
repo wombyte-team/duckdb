@@ -538,9 +538,15 @@ TEST_CASE("Test transaction statement type (rollback)", "[capi]") {
 	REQUIRE(duckdb_prepared_transaction_type(stmt) == DUCKDB_TRANSACTION_TYPE_BEGIN);
 	REQUIRE(duckdb_execute_prepared(stmt, &res) == DuckDBSuccess);
 
+	duckdb_destroy_result(&res);
+	duckdb_destroy_prepare(&stmt);
+
 	REQUIRE(duckdb_prepare(conn, "CREATE TABLE hello (x INT)", &stmt) == DuckDBSuccess);
 	REQUIRE(duckdb_prepared_transaction_type(stmt) == DUCKDB_TRANSACTION_TYPE_INVALID);
 	REQUIRE(duckdb_execute_prepared(stmt, &res) == DuckDBSuccess);
+
+	duckdb_destroy_result(&res);
+	duckdb_destroy_prepare(&stmt);
 
 	REQUIRE(duckdb_get_transaction_state(conn) == DUCKDB_TRANSACTION_STATE_ACTIVE);
 
@@ -548,9 +554,16 @@ TEST_CASE("Test transaction statement type (rollback)", "[capi]") {
 	REQUIRE(duckdb_prepared_transaction_type(stmt) == DUCKDB_TRANSACTION_TYPE_ROLLBACK);
 	REQUIRE(duckdb_execute_prepared(stmt, &res) == DuckDBSuccess);
 
+	duckdb_destroy_result(&res);
+	duckdb_destroy_prepare(&stmt);
+
 	REQUIRE(duckdb_get_transaction_state(conn) == DUCKDB_TRANSACTION_STATE_NONE);
 
 	REQUIRE(duckdb_prepare(conn, "SELECT * FROM hello", &stmt) == DuckDBError);
+
+	duckdb_destroy_prepare(&stmt);
+	duckdb_disconnect(&conn);
+	duckdb_close(&db);
 }
 
 TEST_CASE("Test transaction statement type (commit)", "[capi]") {
@@ -567,19 +580,35 @@ TEST_CASE("Test transaction statement type (commit)", "[capi]") {
 	REQUIRE(duckdb_prepare(conn, "BEGIN", &stmt) == DuckDBSuccess);
 	REQUIRE(duckdb_prepared_transaction_type(stmt) == DUCKDB_TRANSACTION_TYPE_BEGIN);
 	REQUIRE(duckdb_execute_prepared(stmt, &res) == DuckDBSuccess);
+
+	duckdb_destroy_result(&res);
+	duckdb_destroy_prepare(&stmt);
+
 	REQUIRE(duckdb_get_transaction_state(conn) == DUCKDB_TRANSACTION_STATE_ACTIVE);
 
 	REQUIRE(duckdb_prepare(conn, "CREATE TABLE hello (x INT)", &stmt) == DuckDBSuccess);
 	REQUIRE(duckdb_prepared_transaction_type(stmt) == DUCKDB_TRANSACTION_TYPE_INVALID);
 	REQUIRE(duckdb_execute_prepared(stmt, &res) == DuckDBSuccess);
+
+	duckdb_destroy_result(&res);
+	duckdb_destroy_prepare(&stmt);
+
 	REQUIRE(duckdb_get_transaction_state(conn) == DUCKDB_TRANSACTION_STATE_ACTIVE);
 
 	REQUIRE(duckdb_prepare(conn, "COMMIT", &stmt) == DuckDBSuccess);
 	REQUIRE(duckdb_prepared_transaction_type(stmt) == DUCKDB_TRANSACTION_TYPE_COMMIT);
 	REQUIRE(duckdb_execute_prepared(stmt, &res) == DuckDBSuccess);
+
+	duckdb_destroy_result(&res);
+	duckdb_destroy_prepare(&stmt);
+
 	REQUIRE(duckdb_get_transaction_state(conn) == DUCKDB_TRANSACTION_STATE_NONE);
 
 	REQUIRE(duckdb_prepare(conn, "SELECT * FROM hello", &stmt) == DuckDBSuccess);
+
+	duckdb_destroy_prepare(&stmt);
+	duckdb_disconnect(&conn);
+	duckdb_close(&db);
 }
 
 TEST_CASE("Test transaction statement type (error)", "[capi]") {
@@ -596,22 +625,42 @@ TEST_CASE("Test transaction statement type (error)", "[capi]") {
 	REQUIRE(duckdb_prepare(conn, "BEGIN", &stmt) == DuckDBSuccess);
 	REQUIRE(duckdb_prepared_transaction_type(stmt) == DUCKDB_TRANSACTION_TYPE_BEGIN);
 	REQUIRE(duckdb_execute_prepared(stmt, &res) == DuckDBSuccess);
+
+	duckdb_destroy_result(&res);
+	duckdb_destroy_prepare(&stmt);
+
 	REQUIRE(duckdb_get_transaction_state(conn) == DUCKDB_TRANSACTION_STATE_ACTIVE);
 
 	REQUIRE(duckdb_prepare(conn, "BEGIN", &stmt) == DuckDBSuccess);
 	REQUIRE(duckdb_prepared_transaction_type(stmt) == DUCKDB_TRANSACTION_TYPE_BEGIN);
 	REQUIRE(duckdb_execute_prepared(stmt, &res) == DuckDBError);
+
+	duckdb_destroy_result(&res);
+	duckdb_destroy_prepare(&stmt);
+
 	REQUIRE(duckdb_get_transaction_state(conn) == DUCKDB_TRANSACTION_STATE_FAILED);
 
 	REQUIRE(duckdb_prepare(conn, "CREATE TABLE hello (x INT))", &stmt) == DuckDBError);
 	REQUIRE(duckdb_prepared_transaction_type(stmt) == DUCKDB_TRANSACTION_TYPE_INVALID);
 	REQUIRE(duckdb_execute_prepared(stmt, &res) == DuckDBError);
+
+	duckdb_destroy_result(&res);
+	duckdb_destroy_prepare(&stmt);
+
 	REQUIRE(duckdb_get_transaction_state(conn) == DUCKDB_TRANSACTION_STATE_FAILED);
 
 	REQUIRE(duckdb_prepare(conn, "COMMIT", &stmt) == DuckDBSuccess);
 	REQUIRE(duckdb_prepared_transaction_type(stmt) == DUCKDB_TRANSACTION_TYPE_COMMIT);
 	REQUIRE(duckdb_execute_prepared(stmt, &res) == DuckDBSuccess);
+
+	duckdb_destroy_result(&res);
+	duckdb_destroy_prepare(&stmt);
+
 	REQUIRE(duckdb_get_transaction_state(conn) == DUCKDB_TRANSACTION_STATE_NONE);
 
 	REQUIRE(duckdb_prepare(conn, "SELECT * FROM hello", &stmt) == DuckDBError);
+
+	duckdb_destroy_prepare(&stmt);
+	duckdb_disconnect(&conn);
+	duckdb_close(&db);
 }

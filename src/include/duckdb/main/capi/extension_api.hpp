@@ -16,6 +16,7 @@ typedef struct {
 	duckdb_query_progress_type (*duckdb_query_progress)(duckdb_connection connection);
 	void (*duckdb_disconnect)(duckdb_connection *connection);
 	const char *(*duckdb_library_version)();
+	duckdb_transaction_state (*duckdb_get_transaction_state)(duckdb_connection connection);
 	duckdb_state (*duckdb_create_config)(duckdb_config *out_config);
 	size_t (*duckdb_config_count)();
 	duckdb_state (*duckdb_get_config_flag)(size_t index, const char **out_name, const char **out_description);
@@ -59,6 +60,10 @@ typedef struct {
 	duckdb_type (*duckdb_param_type)(duckdb_prepared_statement prepared_statement, idx_t param_idx);
 	duckdb_state (*duckdb_clear_bindings)(duckdb_prepared_statement prepared_statement);
 	duckdb_statement_type (*duckdb_prepared_statement_type)(duckdb_prepared_statement statement);
+	duckdb_transaction_type (*duckdb_prepared_transaction_type)(duckdb_prepared_statement statement);
+	idx_t (*duckdb_prepared_column_count)(duckdb_prepared_statement prepared_statement);
+	const char *(*duckdb_prepared_column_name)(duckdb_prepared_statement prepared_statement, idx_t col);
+	duckdb_logical_type (*duckdb_prepared_column_logical_type)(duckdb_prepared_statement prepared_statement, idx_t col);
 	duckdb_state (*duckdb_bind_value)(duckdb_prepared_statement prepared_statement, idx_t param_idx, duckdb_value val);
 	duckdb_state (*duckdb_bind_parameter_index)(duckdb_prepared_statement prepared_statement, idx_t *param_idx_out,
 	                                            const char *name);
@@ -437,6 +442,7 @@ inline duckdb_ext_api_v0 CreateAPIv0() {
 	result.duckdb_query_progress = duckdb_query_progress;
 	result.duckdb_disconnect = duckdb_disconnect;
 	result.duckdb_library_version = duckdb_library_version;
+	result.duckdb_get_transaction_state = duckdb_get_transaction_state;
 	result.duckdb_create_config = duckdb_create_config;
 	result.duckdb_config_count = duckdb_config_count;
 	result.duckdb_get_config_flag = duckdb_get_config_flag;
@@ -479,6 +485,10 @@ inline duckdb_ext_api_v0 CreateAPIv0() {
 	result.duckdb_param_type = duckdb_param_type;
 	result.duckdb_clear_bindings = duckdb_clear_bindings;
 	result.duckdb_prepared_statement_type = duckdb_prepared_statement_type;
+	result.duckdb_prepared_transaction_type = duckdb_prepared_transaction_type;
+	result.duckdb_prepared_column_count = duckdb_prepared_column_count;
+	result.duckdb_prepared_column_name = duckdb_prepared_column_name;
+	result.duckdb_prepared_column_logical_type = duckdb_prepared_column_logical_type;
 	result.duckdb_bind_value = duckdb_bind_value;
 	result.duckdb_bind_parameter_index = duckdb_bind_parameter_index;
 	result.duckdb_bind_boolean = duckdb_bind_boolean;
