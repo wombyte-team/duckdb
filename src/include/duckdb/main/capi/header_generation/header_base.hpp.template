@@ -226,6 +226,20 @@ typedef enum duckdb_cast_mode {
 	DUCKDB_CAST_NORMAL = 0,
 	DUCKDB_CAST_TRY = 1
 } duckdb_cast_mode;
+//! An enum over DuckDB's different transaction types.
+typedef enum duckdb_transaction_type {
+	DUCKDB_TRANSACTION_TYPE_INVALID = 0,
+	DUCKDB_TRANSACTION_TYPE_BEGIN = 1,
+	DUCKDB_TRANSACTION_TYPE_COMMIT = 2,
+	DUCKDB_TRANSACTION_TYPE_ROLLBACK = 3,
+} duckdb_transaction_type;
+//! An enum over DuckDB's different transaction states.
+typedef enum duckdb_transaction_state {
+	DUCKDB_TRANSACTION_STATE_INVALID = 0,
+	DUCKDB_TRANSACTION_STATE_NONE = 1,
+	DUCKDB_TRANSACTION_STATE_ACTIVE = 2,
+	DUCKDB_TRANSACTION_STATE_FAILED = 3,
+} duckdb_transaction_state;
 
 //===--------------------------------------------------------------------===//
 // General type definitions
@@ -627,25 +641,6 @@ struct duckdb_extension_access {
 	//! Fetch the API
 	void *(*get_api)(duckdb_extension_info info, const char *version);
 };
-
-//===--------------------------------------------------------------------===//
-// Transaction related types
-//===--------------------------------------------------------------------===//
-//! An enum over DuckDB's different transaction types.
-typedef enum {
-	DUCKDB_TRANSACTION_TYPE_INVALID = 0,
-	DUCKDB_TRANSACTION_TYPE_BEGIN = 1,
-	DUCKDB_TRANSACTION_TYPE_COMMIT = 2,
-	DUCKDB_TRANSACTION_TYPE_ROLLBACK = 3,
-} duckdb_transaction_type;
-
-//! An enum over DuckDB's different transaction states.
-typedef enum {
-	DUCKDB_TRANSACTION_STATE_INVALID = 0,
-	DUCKDB_TRANSACTION_STATE_NONE = 1,
-	DUCKDB_TRANSACTION_STATE_ACTIVE = 2,
-	DUCKDB_TRANSACTION_STATE_FAILED = 3,
-} duckdb_transaction_state;
 
 //===--------------------------------------------------------------------===//
 // Functions
