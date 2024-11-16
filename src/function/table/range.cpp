@@ -100,16 +100,24 @@ static void GenerateRangeParameters(DataChunk &input, idx_t row_id, RangeFunctio
 		values[c] = FlatVector::GetValue<int64_t>(input.data[c], row_id);
 	}
 	GetParameters(values, input.ColumnCount(), result.start, result.end, result.increment);
+
+	bool is_empty = false;
+
 	if (result.increment == 0) {
 		throw BinderException("interval cannot be 0!");
 	}
 	if (result.start > result.end && result.increment > 0) {
-		throw BinderException("start is bigger than end, but increment is positive: cannot generate infinite series");
+		is_empty = true;
 	}
 	if (result.start < result.end && result.increment < 0) {
-		throw BinderException("start is smaller than end, but increment is negative: cannot generate infinite series");
+		is_empty = true;
 	}
-	if (GENERATE_SERIES) {
+
+	if (is_empty) {
+		result.start = 0;
+		result.end = 0;
+		result.increment = 1;
+	} else if (GENERATE_SERIES) {
 		// generate_series has inclusive bounds on the RHS
 		if (result.increment < 0) {
 			result.end = result.end - 1;
