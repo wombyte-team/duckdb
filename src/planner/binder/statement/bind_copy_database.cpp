@@ -52,7 +52,7 @@ unique_ptr<LogicalOperator> Binder::BindCopyDatabaseData(Catalog &source_catalog
 
 	// We can just use ExtractEntries here because the order doesn't matter
 	ExportEntries entries;
-	PhysicalExport::ExtractEntries(context, source_schemas, entries);
+	PhysicalExport::ExtractEntries(context, source_schemas, entries, false);
 
 	unique_ptr<LogicalOperator> result;
 	for (auto &table_ref : entries.tables) {

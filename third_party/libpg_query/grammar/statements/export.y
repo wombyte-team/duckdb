@@ -7,6 +7,7 @@ ExportStmt:
 			EXPORT_P DATABASE Sconst copy_options
 				{
 					PGExportStmt *n = makeNode(PGExportStmt);
+					n->persistence = RELPERSISTENCE_PERMANENT;
 					n->database = NULL;
 					n->filename = $3;
 					n->options = NIL;
@@ -19,6 +20,7 @@ ExportStmt:
 			EXPORT_P DATABASE ColId TO Sconst copy_options
 				{
 					PGExportStmt *n = makeNode(PGExportStmt);
+                    n->persistence = RELPERSISTENCE_PERMANENT;
 					n->database = $3;
 					n->filename = $5;
 					n->options = NIL;
@@ -27,6 +29,19 @@ ExportStmt:
 					}
 					$$ = (PGNode *)n;
 				}
+			|
+			EXPORT_P SESSION Sconst copy_options
+                {
+                    PGExportStmt *n = makeNode(PGExportStmt);
+                    n->persistence = PG_RELPERSISTENCE_TEMP;
+                    n->database = NULL;
+                    n->filename = $3;
+                    n->options = NIL;
+                    if ($4) {
+                        n->options = list_concat(n->options, $4);
+                    }
+                    $$ = (PGNode *)n;
+                }
 		;
 
 ImportStmt:

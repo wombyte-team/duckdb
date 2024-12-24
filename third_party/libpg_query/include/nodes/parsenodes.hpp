@@ -2060,6 +2060,7 @@ typedef struct PGExportStmt {
 	PGNodeTag type;
 	char *database;       /* database name */
 	char *filename;       /* filename */
+	char persistence;   /* the requested persist mode */
 	PGList *options;      /* PGList of PGDefElem nodes */
 } PGExportStmt;
 

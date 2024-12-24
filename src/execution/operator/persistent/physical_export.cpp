@@ -11,6 +11,8 @@
 #include "duckdb/transaction/transaction.hpp"
 
 #include <algorithm>
+#include <duckdb/main/client_data.hpp>
+#include <duckdb/main/prepared_statement_data.hpp>
 #include <sstream>
 
 namespace duckdb {
@@ -35,6 +37,22 @@ static void WriteCatalogEntries(stringstream &ss, catalog_entry_vector_t &entrie
 		}
 		ss << '\n';
 	}
+	ss << '\n';
+}
+
+static void WriteSessionState(stringstream &ss, ClientContext &client_context) {
+
+	for (auto &item : client_context.client_data->prepared_statements) {
+		auto prepared_statement = item.second.get();
+		auto unbound_statement = prepared_statement->unbound_statement.get();
+
+		ss << "PREPARE " << item.first << " AS " << unbound_statement->ToString() << ";\n";
+	}
+
+	for (auto &item : client_context.config.user_variables) {
+		ss << "SET VARIABLE " << item.first << " TO " << item.second.ToSQLString() << ";\n";
+	}
+
 	ss << '\n';
 }
 
@@ -118,14 +136,14 @@ unique_ptr<GlobalSourceState> PhysicalExport::GetGlobalSourceState(ClientContext
 }
 
 void PhysicalExport::ExtractEntries(ClientContext &context, vector<reference<SchemaCatalogEntry>> &schema_list,
-                                    ExportEntries &result) {
+                                    ExportEntries &result, bool temporary_only) {
 	for (auto &schema_p : schema_list) {
 		auto &schema = schema_p.get();
 		if (!schema.internal) {
 			result.schemas.push_back(schema);
 		}
 		schema.Scan(context, CatalogType::TABLE_ENTRY, [&](CatalogEntry &entry) {
-			if (entry.internal) {
+			if (entry.internal || (temporary_only && entry.temporary == false)) {
 				return;
 			}
 			if (entry.type != CatalogType::TABLE_ENTRY) {
@@ -136,30 +154,36 @@ void PhysicalExport::ExtractEntries(ClientContext &context, vector<reference<Sch
 			}
 		});
 		schema.Scan(context, CatalogType::SEQUENCE_ENTRY, [&](CatalogEntry &entry) {
-			if (entry.internal) {
+			if (entry.internal || (temporary_only && entry.temporary == false)) {
 				return;
 			}
 			result.sequences.push_back(entry);
 		});
 		schema.Scan(context, CatalogType::TYPE_ENTRY, [&](CatalogEntry &entry) {
-			if (entry.internal) {
+			if (entry.internal || (temporary_only && entry.temporary == false)) {
 				return;
 			}
 			result.custom_types.push_back(entry);
 		});
 		schema.Scan(context, CatalogType::INDEX_ENTRY, [&](CatalogEntry &entry) {
-			if (entry.internal) {
+			if (entry.internal || (temporary_only && entry.temporary == false)) {
 				return;
 			}
 			result.indexes.push_back(entry);
 		});
 		schema.Scan(context, CatalogType::MACRO_ENTRY, [&](CatalogEntry &entry) {
-			if (!entry.internal && entry.type == CatalogType::MACRO_ENTRY) {
+			if (entry.internal || (temporary_only && entry.temporary == false)) {
+				return;
+			}
+			if (entry.type == CatalogType::MACRO_ENTRY) {
 				result.macros.push_back(entry);
 			}
 		});
 		schema.Scan(context, CatalogType::TABLE_MACRO_ENTRY, [&](CatalogEntry &entry) {
-			if (!entry.internal && entry.type == CatalogType::TABLE_MACRO_ENTRY) {
+			if (entry.internal || (temporary_only && entry.temporary == false)) {
+				return;
+			}
+			if (entry.type == CatalogType::TABLE_MACRO_ENTRY) {
 				result.macros.push_back(entry);
 			}
 		});
@@ -177,7 +201,7 @@ catalog_entry_vector_t PhysicalExport::GetNaiveExportOrder(ClientContext &contex
 	// gather all catalog types to export
 	ExportEntries entries;
 	auto schema_list = catalog.GetSchemas(context);
-	PhysicalExport::ExtractEntries(context, schema_list, entries);
+	PhysicalExport::ExtractEntries(context, schema_list, entries, false);
 
 	ReorderTableEntries(entries.tables);
 
@@ -221,7 +245,7 @@ SourceResultType PhysicalExport::GetData(ExecutionContext &context, DataChunk &c
 	ExportEntries entries;
 
 	auto schema_list = Catalog::GetSchemas(ccontext, info->catalog);
-	ExtractEntries(context.client, schema_list, entries);
+	ExtractEntries(context.client, schema_list, entries, info->temporary);
 
 	// consider the order of tables because of foreign key constraint
 	entries.tables.clear();
@@ -246,6 +270,10 @@ SourceResultType PhysicalExport::GetData(ExecutionContext &context, DataChunk &c
 	WriteCatalogEntries(ss, entries.views);
 	WriteCatalogEntries(ss, entries.indexes);
 	WriteCatalogEntries(ss, entries.macros);
+
+	if (info->temporary) {
+		WriteSessionState(ss, context.client);
+	}
 
 	WriteStringStreamToFile(fs, ss, fs.JoinPath(info->file_path, "schema.sql"));
 
