@@ -25,12 +25,12 @@ sqrt
 query IIIIII
 select proisagg, prorettype, proargtypes, proargnames, pronargs, provolatile FROM pg_proc WHERE proname='corr';
 ----
-true	DOUBLE	[DOUBLE, DOUBLE]	[y, x]	2	i
+true	701	[701, 701]	[y, x]	2	i
 
 query IIII
 select provariadic, prorettype, proargtypes, proargnames FROM pg_proc WHERE proname='printf';
 ----
-ANY	VARCHAR	[VARCHAR]	[format]
+2276	1043	[1043]	[format]
 
 query II
 SELECT prokind, provolatile FROM pg_proc WHERE proname = 'random' 

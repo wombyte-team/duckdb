@@ -67,6 +67,7 @@ unique_ptr<CreateInfo> TableCatalogEntry::GetInfo() const {
 	result->columns = columns.Copy();
 	result->constraints.reserve(constraints.size());
 	result->dependencies = dependencies;
+	result->temporary = temporary;
 	std::for_each(constraints.begin(), constraints.end(),
 	              [&result](const unique_ptr<Constraint> &c) { result->constraints.emplace_back(c->Copy()); });
 	result->comment = comment;

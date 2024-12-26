@@ -53,7 +53,7 @@ public:
 	}
 
 	static void ExtractEntries(ClientContext &context, vector<reference<SchemaCatalogEntry>> &schemas,
-	                           ExportEntries &result);
+	                           ExportEntries &result, bool temporary_only);
 	static catalog_entry_vector_t GetNaiveExportOrder(ClientContext &context, Catalog &catalog);
 
 public:

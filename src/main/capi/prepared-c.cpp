@@ -5,6 +5,7 @@
 #include "duckdb/common/uhugeint.hpp"
 #include "duckdb/common/optional_ptr.hpp"
 #include "duckdb/common/case_insensitive_map.hpp"
+#include "duckdb/parser/statement/transaction_statement.hpp"
 
 using duckdb::case_insensitive_map_t;
 using duckdb::Connection;
@@ -83,6 +84,53 @@ const char *duckdb_prepare_error(duckdb_prepared_statement prepared_statement) {
 		return nullptr;
 	}
 	return wrapper->statement->error.Message().c_str();
+}
+
+idx_t duckdb_prepared_column_count(duckdb_prepared_statement prepared_statement) {
+	auto wrapper = reinterpret_cast<PreparedStatementWrapper *>(prepared_statement);
+	if (!wrapper || !wrapper->statement || wrapper->statement->HasError()) {
+		return 0;
+	}
+
+	return wrapper->statement->ColumnCount();
+}
+
+duckdb_logical_type duckdb_prepared_column_logical_type(duckdb_prepared_statement prepared_statement, idx_t col) {
+	auto wrapper = reinterpret_cast<PreparedStatementWrapper *>(prepared_statement);
+	if (!wrapper || !wrapper->statement || wrapper->statement->HasError()) {
+		return nullptr;
+	}
+
+	auto types = wrapper->statement->GetTypes();
+	if (col >= types.size()) {
+		return nullptr;
+	}
+
+	return reinterpret_cast<duckdb_logical_type>(new duckdb::LogicalType(types[col]));
+}
+
+static duckdb::string duckdb_prepared_column_name_internal(duckdb_prepared_statement prepared_statement,
+                                                           idx_t col_idx) {
+	auto wrapper = reinterpret_cast<PreparedStatementWrapper *>(prepared_statement);
+	if (!wrapper || !wrapper->statement || wrapper->statement->HasError()) {
+		return duckdb::string();
+	}
+
+	if (col_idx >= wrapper->statement->ColumnCount()) {
+		return duckdb::string();
+	}
+
+	auto &names = wrapper->statement->GetNames();
+	return names[col_idx];
+}
+
+const char *duckdb_prepared_column_name(duckdb_prepared_statement prepared_statement, idx_t col_idx) {
+	auto identifier = duckdb_prepared_column_name_internal(prepared_statement, col_idx);
+	if (identifier == duckdb::string()) {
+		return NULL;
+	}
+
+	return strdup(identifier.c_str());
 }
 
 idx_t duckdb_nparams(duckdb_prepared_statement prepared_statement) {
@@ -365,6 +413,39 @@ duckdb_statement_type duckdb_prepared_statement_type(duckdb_prepared_statement s
 	auto stmt = reinterpret_cast<PreparedStatementWrapper *>(statement);
 
 	return StatementTypeToC(stmt->statement->GetStatementType());
+}
+
+duckdb_transaction_type duckdb_prepared_transaction_type(duckdb_prepared_statement statement) {
+	if (!statement) {
+		return DUCKDB_TRANSACTION_TYPE_INVALID;
+	}
+
+	auto wrapper = reinterpret_cast<PreparedStatementWrapper *>(statement);
+	auto data = wrapper->statement->data;
+	if (data == nullptr || data->unbound_statement == nullptr) {
+		return DUCKDB_TRANSACTION_TYPE_INVALID;
+	}
+
+	auto stmt = data->unbound_statement.get();
+	if (stmt == nullptr || stmt->type != duckdb::StatementType::TRANSACTION_STATEMENT) {
+		return DUCKDB_TRANSACTION_TYPE_INVALID;
+	}
+
+	auto transaction_stmt = &stmt->Cast<duckdb::TransactionStatement>();
+	if (transaction_stmt == nullptr) {
+		return DUCKDB_TRANSACTION_TYPE_INVALID;
+	}
+
+	switch (transaction_stmt->info->type) {
+	case duckdb::TransactionType::BEGIN_TRANSACTION:
+		return DUCKDB_TRANSACTION_TYPE_BEGIN;
+	case duckdb::TransactionType::COMMIT:
+		return DUCKDB_TRANSACTION_TYPE_COMMIT;
+	case duckdb::TransactionType::ROLLBACK:
+		return DUCKDB_TRANSACTION_TYPE_ROLLBACK;
+	default:
+		return DUCKDB_TRANSACTION_TYPE_INVALID;
+	}
 }
 
 template <class T>

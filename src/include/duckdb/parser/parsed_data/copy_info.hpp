@@ -44,6 +44,8 @@ public:
 	case_insensitive_map_t<vector<Value>> options;
 	// The SQL statement used instead of a table when copying data out to a file
 	unique_ptr<QueryNode> select_statement;
+	//! Whether or not copy temporary entities
+	bool temporary;
 
 public:
 	static string CopyOptionsToString(const string &format, const case_insensitive_map_t<vector<Value>> &options);

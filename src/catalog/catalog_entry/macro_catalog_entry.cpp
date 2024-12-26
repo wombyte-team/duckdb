@@ -49,6 +49,7 @@ unique_ptr<CreateInfo> MacroCatalogEntry::GetInfo() const {
 	info->dependencies = dependencies;
 	info->comment = comment;
 	info->tags = tags;
+	info->temporary = temporary;
 	return std::move(info);
 }
 

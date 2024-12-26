@@ -150,6 +150,23 @@
             "comment": {
                 "description": "Returns the version of the linked DuckDB, with a version postfix for dev versions\n\nUsually used for developing C extensions that must return this for a compatibility check.\n"
             }
+        },
+        {
+            "name": "duckdb_get_transaction_state",
+            "return_type": "duckdb_transaction_state",
+            "params": [
+                {
+                    "type": "duckdb_connection",
+                    "name": "connection"
+                }
+            ],
+            "comment": {
+                "description": "Returns the current transaction state of the connection.\n\n",
+                "param_comments": {
+                    "connection": "The connection to get the transaction state from."
+                },
+                "return_value": "The transaction state of the specified connection or `DUCKDB_TRANSACTION_STATE_INVALID` on failure."
+            }
         }
     ]
 }

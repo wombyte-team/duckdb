@@ -1,0 +1,289 @@
+# name: test/sql/export/export_session.test
+# description: Test export temporary database
+# group: [export]
+
+statement ok
+SET default_null_order='nulls_first';
+
+# create a bunch of tables with data and views
+
+statement ok
+BEGIN TRANSACTION
+
+statement ok
+CREATE TEMP TABLE integers(i INTEGER, j INTEGER, CHECK(i+j<10))
+
+statement ok
+CREATE TEMP TABLE strings(v VARCHAR, d DATE, PRIMARY KEY(d))
+
+statement ok
+CREATE TYPE mood AS ENUM ('sad', 'ok', 'happy');
+
+statement ok
+CREATE TEMP TABLE enums(current_mood mood)
+
+statement ok
+INSERT INTO integers VALUES (1, 3), (4, 2), (NULL, 1)
+
+statement ok
+INSERT INTO strings VALUES ('NULL', DATE '1992-01-01'), (NULL, DATE '1993-01-01');
+
+statement ok
+INSERT INTO enums VALUES ('sad'),('ok'),('sad'),('happy')
+
+statement ok
+CREATE TEMP VIEW v1 AS SELECT * FROM integers WHERE i > 3; --
+CREATE TEMP VIEW v2 AS SELECT * FROM integers WHERE i < 3;
+
+statement ok
+CREATE TEMP VIEW v3 AS SELECT * FROM integers WHERE i IS NULL --
+
+statement ok
+CREATE TEMP SEQUENCE seq
+
+query I
+SELECT nextval('seq')
+----
+1
+
+query II
+SELECT * FROM v2 ORDER BY 1
+----
+1	3
+
+# check data
+query II
+SELECT * FROM integers ORDER BY 1
+----
+NULL	1
+1	3
+4	2
+
+query I
+SELECT * FROM enums ORDER BY 1
+----
+sad
+sad
+ok
+happy
+
+query II
+SELECT * FROM strings ORDER BY 1
+----
+NULL	1993-01-01
+NULL	1992-01-01
+
+query II
+SELECT * FROM v1 ORDER BY 1
+----
+4	2
+
+query II
+SELECT * FROM v2 ORDER BY 1
+----
+1	3
+
+query II
+SELECT * FROM v3 ORDER BY 1
+----
+NULL	1
+
+statement ok
+CREATE SCHEMA s1;
+CREATE SCHEMA s2;
+
+statement ok
+CREATE TEMP TABLE table01(i INTEGER, j INTEGER);
+CREATE TABLE s1.table01(i INTEGER, j INTEGER);
+CREATE TABLE s2.table01(i INTEGER, j INTEGER);
+
+statement ok
+INSERT INTO table01 VALUES (1, 1), (2, 2);
+INSERT INTO s1.table01 VALUES (3, 3), (4, 4);
+INSERT INTO s2.table01 VALUES (5, 5), (6, 6);
+
+
+query II
+SELECT * FROM table01 ORDER BY i;
+----
+1	1
+2	2
+
+query II
+SELECT * FROM s1.table01 ORDER BY i;
+----
+3	3
+4	4
+
+query II
+SELECT * FROM s2.table01 ORDER BY i;
+----
+5	5
+6	6
+
+statement ok
+CREATE TEMP MACRO add(a, b) AS a + b;
+
+statement ok
+PREPARE p1 AS INSERT INTO table01 VALUES ($1, $2)
+
+statement ok
+EXECUTE p1(3, 3)
+
+statement ok
+SET VARIABLE my_var = 30;
+
+query I
+SELECT 20 + getvariable('my_var') AS total;
+----
+50
+
+# setting from a subquery
+statement ok
+CREATE TABLE animal_list(a VARCHAR);
+
+statement ok
+INSERT INTO animal_list VALUES ('duck'), ('goose');
+
+statement ok
+SET VARIABLE animals=(SELECT LIST(a) FROM animal_list)
+
+query I
+SELECT getvariable('animals')
+----
+[duck, goose]
+
+
+# now export the db
+statement ok
+EXPORT SESSION '__TEST_DIR__/export_session' (FORMAT CSV)
+
+statement ok
+EXPORT DATABASE memory TO '__TEST_DIR__/export_memory' (FORMAT CSV)
+
+statement ok
+RESET VARIABLE my_var;
+
+statement ok
+RESET VARIABLE animals;
+
+query I
+SELECT getvariable('animals')
+----
+NULL
+
+statement ok
+ROLLBACK
+
+statement ok
+IMPORT DATABASE '__TEST_DIR__/export_session'
+
+query I
+SELECT 20 + getvariable('my_var') AS total;
+----
+50
+
+query I
+SELECT getvariable('animals')
+----
+[duck, goose]
+
+query I
+SELECT add(1, 2)
+----
+3
+
+# check data
+query II
+SELECT * FROM integers ORDER BY 1
+----
+NULL	1
+1	3
+4	2
+
+query II
+SELECT * FROM strings ORDER BY 1
+----
+NULL	1993-01-01
+NULL	1992-01-01
+
+query I
+SELECT * FROM enums ORDER BY 1
+----
+sad
+sad
+ok
+happy
+
+query II
+SELECT * FROM v1 ORDER BY 1
+----
+4	2
+
+query II
+SELECT * FROM v2 ORDER BY 1
+----
+1	3
+
+query II
+SELECT * FROM v3 ORDER BY 1
+----
+NULL	1
+
+# sequence is not reset to base value, but keeps the value it had
+query I
+SELECT nextval('seq')
+----
+2
+
+
+statement ok
+EXECUTE p1(4, 4)
+
+query II
+SELECT * FROM table01 ORDER BY i;
+----
+1	1
+2	2
+3	3
+4	4
+
+statement error
+SELECT * FROM s1.table01 ORDER BY i;
+----
+
+statement error
+SELECT * FROM s2.table01 ORDER BY i;
+----
+
+# verify that constraints are still there
+statement error
+INSERT INTO integers VALUES (5, 6)
+----
+
+statement error
+INSERT INTO strings VALUES(NULL, NULL)
+----
+
+query I
+SELECT * FROM enums ORDER BY 1
+----
+sad
+sad
+ok
+happy
+
+statement ok
+IMPORT DATABASE '__TEST_DIR__/export_memory'
+
+query II
+SELECT * FROM s1.table01 ORDER BY i;
+----
+3	3
+4	4
+
+query II
+SELECT * FROM s2.table01 ORDER BY i;
+----
+5	5
+6	6

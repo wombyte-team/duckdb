@@ -198,6 +198,12 @@ BoundStatement Binder::Bind(ExportStatement &stmt) {
 	vector<unique_ptr<LogicalOperator>> export_nodes;
 	for (auto &t : tables) {
 		auto &table = t.get().Cast<TableCatalogEntry>();
+
+		if (stmt.info->temporary && table.GetInfo()->temporary == false) {
+			// skip non-temporary tables when exporting temporary tables
+			continue;
+		}
+
 		auto info = make_uniq<CopyInfo>();
 		// we copy the options supplied to the EXPORT
 		info->format = stmt.info->format;

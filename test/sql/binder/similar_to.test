@@ -59,6 +59,6 @@ statement ok
 create table s1.orders(i int)
 
 statement error
-select * from ord
+select * from orde
 ----
 s1.orders

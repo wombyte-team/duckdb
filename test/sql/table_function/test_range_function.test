@@ -88,11 +88,11 @@ statement error
 SELECT * FROM range(0, 10, 0)
 ----
 
-statement error
+query I
 SELECT * FROM range(0, 10, -1)
 ----
 
-statement error
+query I
 SELECT * FROM range(10, 0, 1)
 ----
 

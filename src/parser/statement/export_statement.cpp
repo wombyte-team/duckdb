@@ -17,11 +17,18 @@ unique_ptr<SQLStatement> ExportStatement::Copy() const {
 }
 
 string ExportStatement::ToString() const {
-	string result = "";
-	result += "EXPORT DATABASE";
-	if (!database.empty()) {
-		result += " " + database + " TO";
+	string result = "EXPORT";
+
+	if (info->temporary) {
+		result += " SESSION";
+	} else {
+		result += " DATABASE";
+
+		if (database.empty() == false) {
+			result += " " + database + " TO";
+		}
 	}
+
 	auto &path = info->file_path;
 	D_ASSERT(info->is_from == false);
 	auto &options = info->options;
