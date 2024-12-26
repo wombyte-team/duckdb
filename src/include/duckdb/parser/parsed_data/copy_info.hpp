@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "duckdb/parser/query_node.hpp"
 #include "duckdb/parser/parsed_data/parse_info.hpp"
 #include "duckdb/common/vector.hpp"
 #include "duckdb/common/unordered_map.hpp"
@@ -16,14 +17,12 @@
 
 namespace duckdb {
 
-class QueryNode;
-
 struct CopyInfo : public ParseInfo {
 public:
 	static constexpr const ParseInfoType TYPE = ParseInfoType::COPY_INFO;
 
 public:
-	CopyInfo() : ParseInfo(TYPE), catalog(INVALID_CATALOG), schema(DEFAULT_SCHEMA) {
+	CopyInfo() : ParseInfo(TYPE), catalog(INVALID_CATALOG), schema(DEFAULT_SCHEMA), temporary(false) {
 	}
 
 	//! The catalog name to copy to/from

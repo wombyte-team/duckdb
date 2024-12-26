@@ -16,7 +16,7 @@ struct BitState {
 };
 
 template <class OP>
-static AggregateFunction GetBitfieldUnaryAggregate(LogicalType type) {
+static AggregateFunction GetBitfieldUnaryAggregate(const LogicalType &type) {
 	switch (type.id()) {
 	case LogicalTypeId::TINYINT:
 		return AggregateFunction::UnaryAggregate<BitState<uint8_t>, int8_t, int8_t, OP>(type, type);
