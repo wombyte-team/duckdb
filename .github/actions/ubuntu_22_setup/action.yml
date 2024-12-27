@@ -17,7 +17,7 @@ inputs:
     description: 'Install ccache'
     default: 0
   git_ref:
-    description: 'git reference to checkout'
+    description: 'Git reference to checkout'
     default: ''
   python_version:
     description: 'Python version to install'
