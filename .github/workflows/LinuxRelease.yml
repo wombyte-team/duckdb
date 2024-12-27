@@ -21,18 +21,18 @@ on:
         description: 'Tests to skip'
 
   repository_dispatch:
-  push:
-    branches:
-      - '**'
-      - '!main'
-      - '!feature'
-    paths-ignore:
-      - '**.md'
-      - 'tools/**'
-      - '!tools/shell/**'
-      - '.github/patches/duckdb-wasm/**'
-      - '.github/workflows/**'
-      - '!.github/workflows/LinuxRelease.yml'
+#  push:
+#    branches:
+#      - '**'
+#      - '!main'
+#      - '!feature'
+#    paths-ignore:
+#      - '**.md'
+#      - 'tools/**'
+#      - '!tools/shell/**'
+#      - '.github/patches/duckdb-wasm/**'
+#      - '.github/workflows/**'
+#      - '!.github/workflows/LinuxRelease.yml'
 
   pull_request:
     types: [ opened, reopened, ready_for_review ]

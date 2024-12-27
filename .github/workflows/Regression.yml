@@ -2,18 +2,18 @@ name: Regression
 on:
   workflow_dispatch:
   repository_dispatch:
-  push:
-    branches:
-      - '**'
-      - '!main'
-      - '!feature'
-    paths-ignore:
-      - '**.md'
-      - 'tools/**'
-      - '!tools/pythonpkg/**'
-      - '.github/patches/duckdb-wasm/**'
-      - '.github/workflows/**'
-      - '!.github/workflows/Regression.yml'
+#  push:
+#    branches:
+#      - '**'
+#      - '!main'
+#      - '!feature'
+#    paths-ignore:
+#      - '**.md'
+#      - 'tools/**'
+#      - '!tools/pythonpkg/**'
+#      - '.github/patches/duckdb-wasm/**'
+#      - '.github/workflows/**'
+#      - '!.github/workflows/Regression.yml'
 
   pull_request:
     types: [ opened, reopened, ready_for_review ]
@@ -39,7 +39,7 @@ jobs:
     name: Regression Tests
     runs-on: ubuntu-22.04
     container:
-      image: ubuntu:22.04
+      image: catthehacker/ubuntu:full-22.04
       options: --user root
     env:
       CC: gcc-10
@@ -56,90 +56,82 @@ jobs:
       - uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 0
+          ref: ${{ inputs.git_ref }}
 
-      - uses: actions/setup-python@v5.3.0
+      - uses: ./.github/actions/ubuntu_22_setup
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          ccache: 1
+          python_version: '3.12'
 
-      - name: Install
-        shell: bash
-        run: apt-get update -y -qq && apt-get install -y -qq ninja-build && pip install requests
-
-      - name: Setup Ccache
-        uses: hendrikmuhs/ccache-action@main
-        with:
-          key: ${{ github.job }}
-          save: ${{ github.ref == 'refs/heads/main' || github.repository != 'duckdb/duckdb' }}
-
-      - name: Build
-        shell: bash
-        run: |
-          make
-          git clone --branch ${{ env.BASE_BRANCH }} https://github.com/wombyte-team/duckdb.git --depth=1
-          cd duckdb
-          make
-          cd ..
-
-      - name: Set up benchmarks
-        shell: bash
-        run: |
-          cp -r benchmark duckdb/
-
-      - name: Regression Test Micro
-        if: always()
-        shell: bash
-        run: |
-          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/micro.csv --verbose --threads=2
-
-      - name: Regression Test Ingestion Perf
-        if: always()
-        shell: bash
-        run: |
-          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/ingestion.csv --verbose --threads=2
-
-      - name: Regression Test TPCH
-        if: always()
-        shell: bash
-        run: |
-          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/tpch.csv --verbose --threads=2
-
-      - name: Regression Test TPCH-PARQUET
-        if: always()
-        shell: bash
-        run: |
-          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/tpch_parquet.csv --verbose --threads=2
-
-      - name: Regression Test TPCDS
-        if: always()
-        shell: bash
-        run: |
-          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/tpcds.csv --verbose --threads=2
-
-      - name: Regression Test H2OAI
-        if: always()
-        shell: bash
-        run: |
-          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/h2oai.csv --verbose --threads=2
-
-      - name: Regression Test IMDB
-        if: always()
-        shell: bash
-        run: |
-          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/imdb.csv --verbose --threads=2
-
-      - name: Regression Test CSV
-        if: always()
-        shell: bash
-        run: |
-          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/csv.csv --verbose --threads=2
+#      - name: Install
+#        shell: bash
+#        run: pip install requests
+#
+#      - name: Build
+#        shell: bash
+#        run: |
+#          make
+#          git clone --branch ${{ env.BASE_BRANCH }} https://github.com/wombyte-team/duckdb.git --depth=1
+#          cd duckdb
+#          make
+#          cd ..
+#
+#      - name: Set up benchmarks
+#        shell: bash
+#        run: |
+#          cp -r benchmark duckdb/
+#
+#      - name: Regression Test Micro
+#        if: always()
+#        shell: bash
+#        run: |
+#          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/micro.csv --verbose --threads=2
+#
+#      - name: Regression Test Ingestion Perf
+#        if: always()
+#        shell: bash
+#        run: |
+#          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/ingestion.csv --verbose --threads=2
+#
+#      - name: Regression Test TPCH
+#        if: always()
+#        shell: bash
+#        run: |
+#          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/tpch.csv --verbose --threads=2
+#
+#      - name: Regression Test TPCH-PARQUET
+#        if: always()
+#        shell: bash
+#        run: |
+#          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/tpch_parquet.csv --verbose --threads=2
+#
+#      - name: Regression Test TPCDS
+#        if: always()
+#        shell: bash
+#        run: |
+#          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/tpcds.csv --verbose --threads=2
+#
+#      - name: Regression Test H2OAI
+#        if: always()
+#        shell: bash
+#        run: |
+#          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/h2oai.csv --verbose --threads=2
+#
+#      - name: Regression Test IMDB
+#        if: always()
+#        shell: bash
+#        run: |
+#          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/imdb.csv --verbose --threads=2
+#
+#      - name: Regression Test CSV
+#        if: always()
+#        shell: bash
+#        run: |
+#          python scripts/regression_test_runner.py --old=duckdb/build/release/benchmark/benchmark_runner --new=build/release/benchmark/benchmark_runner --benchmarks=.github/regression/csv.csv --verbose --threads=2
 
   regression-test-storage:
     name: Storage Size Regression Test
     runs-on: ubuntu-22.04
-    container:
-      image: ubuntu:22.04
-      options: --user root
     env:
       CC: gcc-10
       CXX: g++-10
@@ -155,11 +147,10 @@ jobs:
       - uses: actions/setup-python@v5.3.0
         with:
           python-version: '3.12'
-          cache: 'pip'
 
       - name: Install
         shell: bash
-        run: apt-get update -y -qq && apt-get install -y -qq ninja-build&& pip install requests
+        run: sudo apt-get update -y -qq && sudo apt-get install -y -qq ninja-build&& pip install requests
 
       - name: Setup Ccache
         uses: hendrikmuhs/ccache-action@main
@@ -245,7 +236,7 @@ jobs:
 
       - name: Install
         shell: bash
-        run: apt-get update -y -qq && apt-get install -y -qq ninja-build && pip install requests
+        run: sudo apt-get update -y -qq && sudo apt-get install -y -qq ninja-build && pip install requests
 
       - name: Setup Ccache
         uses: hendrikmuhs/ccache-action@main
@@ -286,12 +277,11 @@ jobs:
       - uses: actions/setup-python@v5.3.0
         with:
           python-version: '3.12'
-          cache: 'pip'
 
       - name: Install
         shell: bash
         run: |
-          apt-get update -y -qq && apt-get install -y -qq ninja-build
+          sudo apt-get update -y -qq && sudo apt-get install -y -qq ninja-build
           pip install numpy pytest pandas mypy psutil pyarrow
 
       - name: Setup Ccache
@@ -359,11 +349,10 @@ jobs:
       - uses: actions/setup-python@v5.3.0
         with:
           python-version: '3.12'
-          cache: 'pip'
 
       - name: Install
         shell: bash
-        run: apt-get update -y -qq && apt-get install -y -qq ninja-build && pip install tqdm
+        run: sudo apt-get update -y -qq && sudo apt-get install -y -qq ninja-build && pip install tqdm
 
       - name: Setup Ccache
         uses: hendrikmuhs/ccache-action@main

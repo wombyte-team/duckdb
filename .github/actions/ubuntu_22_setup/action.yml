@@ -19,6 +19,9 @@ inputs:
   git_ref:
     description: 'git reference to checkout'
     default: ''
+  python_version:
+    description: 'Python version to install'
+    default: ''
 
 runs:
   using: "composite"
@@ -26,55 +29,30 @@ runs:
     - name: Install
       shell: bash
       run: |
-        apt-get update -y -qq
-        apt-get install -y -qq software-properties-common
-        add-apt-repository ppa:git-core/ppa
-        apt-get update -y -qq
-        apt-get install -y -qq --fix-missing ninja-build make gcc-multilib g++-multilib libssl-dev wget openjdk-8-jdk zip maven unixodbc-dev libc6-dev-i386 lib32readline6-dev libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext unzip build-essential checkinstall libffi-dev curl libz-dev openssh-client pkg-config
+        sudo apt-get update -y -qq
+        sudo apt-get install -y -qq software-properties-common
+        sudo apt-get update -y -qq
+        sudo apt-get install -y -qq --fix-missing ninja-build make gcc-multilib g++-multilib libssl-dev wget openjdk-8-jdk zip maven unixodbc-dev libc6-dev-i386 lib32readline6-dev libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext unzip build-essential checkinstall libffi-dev curl libz-dev openssh-client pkg-config
 
     - name: Install
       shell: bash
       if: ${{ inputs.aarch64_cross_compile == 1 }}
       run: |
-        apt-get install -y -qq gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-
-    - name: Install Git 2.18.5
-      shell: bash
-      run: |
-        wget https://github.com/git/git/archive/refs/tags/v2.18.5.tar.gz
-        tar xvf v2.18.5.tar.gz
-        cd git-2.18.5
-        make
-        make prefix=/usr install
-        git --version
-
-    - uses: actions/checkout@v4.2.2
-      with:
-        fetch-depth: 0
-        ref: ${{ inputs.git_ref }}
+        sudo apt-get install -y -qq gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
     - name: Install CMake 3.21
       shell: bash
       run: |
         wget https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-linux-x86_64.sh
         chmod +x cmake-3.21.3-linux-x86_64.sh
-        ./cmake-3.21.3-linux-x86_64.sh --skip-license --prefix=/usr/local
+        sudo ./cmake-3.21.3-linux-x86_64.sh --skip-license --prefix=/usr/local
         cmake --version
 
-    - name: Install Python 3.8
-      if: ${{ inputs.python }} == 1
-      shell: bash
-      run: |
-        wget https://www.python.org/ftp/python/3.8.17/Python-3.8.17.tgz
-        tar xvf Python-3.8.17.tgz
-        cd Python-3.8.17
-        mkdir -p pythonbin
-        ./configure --with-ensurepip=install
-        make -j
-        make install
-        python3.8 --version
-        python3.8 -m pip install pip
-        python3.8 -m pip install requests awscli
+    - name: Install Python ${{ inputs.python_version }}
+      if: ${{ inputs.python_version != '' }}
+      uses: actions/setup-python@v5.3.0
+      with:
+        python-version: ${{ inputs.python_version }}
 
     - name: Version Check
       shell: bash
