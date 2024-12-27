@@ -17,18 +17,18 @@ on:
       skip_tests:
         type: string
   repository_dispatch:
-  push:
-    branches:
-      - '**'
-      - '!main'
-      - '!feature'
-    paths-ignore:
-      - '**.md'
-      - 'tools/**'
-      - '!tools/shell/**'
-      - '.github/patches/duckdb-wasm/**'
-      - '.github/workflows/**'
-      - '!.github/workflows/OSX.yml'
+#  push:
+#    branches:
+#      - '**'
+#      - '!main'
+#      - '!feature'
+#    paths-ignore:
+#      - '**.md'
+#      - 'tools/**'
+#      - '!tools/shell/**'
+#      - '.github/patches/duckdb-wasm/**'
+#      - '.github/workflows/**'
+#      - '!.github/workflows/OSX.yml'
 
 
 concurrency:

@@ -17,18 +17,18 @@ on:
       skip_tests:
         type: string
   repository_dispatch:
-  push:
-    branches:
-      - '**'
-      - '!main'
-      - '!feature'
-    paths-ignore:
-      - '**.md'
-      - 'tools/**'
-      - '!tools/shell/**'
-      - '.github/patches/duckdb-wasm/**'
-      - '.github/workflows/**'
-      - '!.github/workflows/Windows.yml'
+#  push:
+#    branches:
+#      - '**'
+#      - '!main'
+#      - '!feature'
+#    paths-ignore:
+#      - '**.md'
+#      - 'tools/**'
+#      - '!tools/shell/**'
+#      - '.github/patches/duckdb-wasm/**'
+#      - '.github/workflows/**'
+#      - '!.github/workflows/Windows.yml'
 
   pull_request:
     types: [opened, reopened, ready_for_review]
@@ -240,7 +240,7 @@ jobs:
          shell: msys2 {0}
          run: |
            cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_EXTENSIONS=parquet -DOVERRIDE_GIT_DESCRIBE="$OVERRIDE_GIT_DESCRIBE"
-           cmake --build . --config Release 
+           cmake --build . --config Release
 
        - name: Test
          shell: msys2 {0}

@@ -2,20 +2,20 @@
 on:
   workflow_dispatch:
   repository_dispatch:
-  push:
-    branches:
-      - '**'
-      - '!main'
-      - '!feature'
-    paths-ignore:
-      - '**.md'
-      - 'examples/**'
-      - 'test/**'
-      - 'tools/**'
-      - '!tools/swift/**'
-      - '.github/patches/duckdb-wasm/**'
-      - '.github/workflows/**'
-      - '!.github/workflows/R_CMD_CHECK.yml'
+#  push:
+#    branches:
+#      - '**'
+#      - '!main'
+#      - '!feature'
+#    paths-ignore:
+#      - '**.md'
+#      - 'examples/**'
+#      - 'test/**'
+#      - 'tools/**'
+#      - '!tools/swift/**'
+#      - '.github/patches/duckdb-wasm/**'
+#      - '.github/workflows/**'
+#      - '!.github/workflows/R_CMD_CHECK.yml'
 
   pull_request:
     types: [ opened, reopened, ready_for_review ]
