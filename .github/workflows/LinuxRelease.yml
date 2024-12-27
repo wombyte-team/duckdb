@@ -63,6 +63,7 @@ jobs:
       FORCE_WARN_UNUSED: 1
       DUCKDB_RUN_PARALLEL_CSV_TESTS: 1
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+      RUNNER_ALLOW_RUNASROOT: 1
 
     steps:
     - uses: actions/checkout@v4.2.2
