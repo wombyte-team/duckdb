@@ -63,7 +63,7 @@ jobs:
 
       - name: Install
         shell: bash
-        run: sudo apt-get update -y -qq && sudo apt-get install -y -qq ninja-build && pip install requests
+        run: apt-get update -y -qq && apt-get install -y -qq ninja-build && pip install requests
 
       - name: Setup Ccache
         uses: hendrikmuhs/ccache-action@main
@@ -157,7 +157,7 @@ jobs:
 
       - name: Install
         shell: bash
-        run: sudo apt-get update -y -qq && sudo apt-get install -y -qq ninja-build && pip install requests
+        run: apt-get update -y -qq && apt-get install -y -qq ninja-build && pip install requests
 
       - name: Setup Ccache
         uses: hendrikmuhs/ccache-action@main
@@ -243,7 +243,7 @@ jobs:
 
       - name: Install
         shell: bash
-        run: sudo apt-get update -y -qq && sudo apt-get install -y -qq ninja-build && pip install requests
+        run: apt-get update -y -qq && apt-get install -y -qq ninja-build && pip install requests
 
       - name: Setup Ccache
         uses: hendrikmuhs/ccache-action@main
@@ -288,7 +288,7 @@ jobs:
       - name: Install
         shell: bash
         run: |
-          sudo apt-get update -y -qq && sudo apt-get install -y -qq ninja-build
+          apt-get update -y -qq && apt-get install -y -qq ninja-build
           pip install numpy pytest pandas mypy psutil pyarrow
 
       - name: Setup Ccache
@@ -359,7 +359,7 @@ jobs:
 
       - name: Install
         shell: bash
-        run: sudo apt-get update -y -qq && sudo apt-get install -y -qq ninja-build && pip install tqdm
+        run: apt-get update -y -qq && apt-get install -y -qq ninja-build && pip install tqdm
 
       - name: Setup Ccache
         uses: hendrikmuhs/ccache-action@main
