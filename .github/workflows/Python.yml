@@ -17,20 +17,20 @@ on:
       skip_tests:
         type: string
   repository_dispatch:
-  push:
-    branches:
-      - '**'
-      - '!main'
-      - '!feature'
-    paths-ignore:
-      - '**.md'
-      - 'examples/**'
-      - 'test/**'
-      - 'tools/**'
-      - '!tools/pythonpkg/**'
-      - '.github/patches/duckdb-wasm/**'
-      - '.github/workflows/**'
-      - '!.github/workflows/Python.yml'
+#  push:
+#    branches:
+#      - '**'
+#      - '!main'
+#      - '!feature'
+#    paths-ignore:
+#      - '**.md'
+#      - 'examples/**'
+#      - 'test/**'
+#      - 'tools/**'
+#      - '!tools/pythonpkg/**'
+#      - '.github/patches/duckdb-wasm/**'
+#      - '.github/workflows/**'
+#      - '!.github/workflows/Python.yml'
 
   pull_request:
     types: [opened, reopened, ready_for_review]
