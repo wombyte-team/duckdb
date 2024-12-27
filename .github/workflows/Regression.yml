@@ -2,18 +2,18 @@ name: Regression
 on:
   workflow_dispatch:
   repository_dispatch:
-#  push:
-#    branches:
-#      - '**'
-#      - '!main'
-#      - '!feature'
-#    paths-ignore:
-#      - '**.md'
-#      - 'tools/**'
-#      - '!tools/pythonpkg/**'
-#      - '.github/patches/duckdb-wasm/**'
-#      - '.github/workflows/**'
-#      - '!.github/workflows/Regression.yml'
+  push:
+    branches:
+      - '**'
+      - '!main'
+      - '!feature'
+    paths-ignore:
+      - '**.md'
+      - 'tools/**'
+      - '!tools/pythonpkg/**'
+      - '.github/patches/duckdb-wasm/**'
+      - '.github/workflows/**'
+      - '!.github/workflows/Regression.yml'
 
   pull_request:
     types: [ opened, reopened, ready_for_review ]
