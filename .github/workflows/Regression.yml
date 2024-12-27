@@ -38,9 +38,6 @@ jobs:
   regression-test-benchmark-runner:
     name: Regression Tests
     runs-on: ubuntu-22.04
-    container:
-      image: catthehacker/ubuntu:full-22.04
-      options: --user root
     env:
       CC: gcc-10
       CXX: g++-10
