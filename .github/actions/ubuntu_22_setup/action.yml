@@ -4,24 +4,18 @@ inputs:
   openssl:
     description: 'OpenSSL'
     default: 0
-  python:
-    description: 'Python'
-    default: 1
   aarch64_cross_compile:
     description: 'Install dependencies for aarch64 cross-compiling'
     default: 0
   vcpkg:
     description: 'Install vcpkg'
     default: 0
-  ccache:
-    description: 'Install ccache'
-    default: 0
   git_ref:
     description: 'Git reference to checkout'
     default: ''
   python_version:
     description: 'Python version to install'
-    default: ''
+    default: '3.12'
 
 runs:
   using: "composite"
@@ -67,13 +61,6 @@ runs:
       uses: lukka/run-vcpkg@v11.1
       with:
         vcpkgGitCommitId: a1a1cbc975abf909a6c8985a6a2b8fe20bbd9bd6
-
-    - name: Setup Ccache
-      if: ${{ inputs.ccache == 1 }}
-      uses: hendrikmuhs/ccache-action@v1.2.11 # Note: pinned due to GLIBC incompatibility in later releases
-      with:
-        key: ${{ github.job }}
-        save: ${{ github.ref == 'refs/heads/main' || github.repository != 'duckdb/duckdb' }}
 
     - name: Instal OpenSSL through vcpkg
       if: ${{ inputs.openssl == 1 }}
