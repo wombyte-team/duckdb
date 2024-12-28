@@ -1574,7 +1574,7 @@ string Value::ToSQLString() const {
 			auto &child = map_values[i];
 			auto &children = StructValue::GetChildren(child);
 			D_ASSERT(children.size() == 2);
-			ret +="'" + children[0].ToString() + "': " + children[1].ToSQLString();
+			ret += "'" + children[0].ToString() + "': " + children[1].ToSQLString();
 			if (i < map_values.size() - 1) {
 				ret += ", ";
 			}
