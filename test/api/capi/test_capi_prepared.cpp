@@ -260,6 +260,7 @@ TEST_CASE("Test prepared statements in C API", "[capi]") {
 	REQUIRE(duckdb_param_type(stmt, 0) == DUCKDB_TYPE_INVALID);
 	REQUIRE(duckdb_param_type(stmt, 1) == DUCKDB_TYPE_INTEGER);
 	REQUIRE(duckdb_param_type(stmt, 2) == DUCKDB_TYPE_INVALID);
+	REQUIRE(duckdb_prepared_statement_result_type(stmt) == DUCKDB_RESULT_TYPE_CHANGED_ROWS);
 
 	for (int32_t i = 1; i <= 1000; i++) {
 		duckdb_bind_int32(stmt, 1, i);
@@ -310,6 +311,7 @@ TEST_CASE("Test prepared statements in C API", "[capi]") {
 	REQUIRE(duckdb_nparams(stmt) == 1);
 	REQUIRE(duckdb_param_type(nullptr, 0) == DUCKDB_TYPE_INVALID);
 	REQUIRE(duckdb_param_type(stmt, 1) == DUCKDB_TYPE_INTEGER);
+	REQUIRE(duckdb_prepared_statement_result_type(stmt) == DUCKDB_RESULT_TYPE_QUERY_RESULT);
 
 	duckdb_destroy_prepare(&stmt);
 }
@@ -323,6 +325,7 @@ TEST_CASE("Test duckdb_param_type", "[capi]") {
 	REQUIRE(duckdb_connect(db, &conn) == DuckDBSuccess);
 	REQUIRE(duckdb_prepare(conn, "select $1::integer, $2::integer", &stmt) == DuckDBSuccess);
 
+	REQUIRE(duckdb_prepared_statement_result_type(stmt) == DUCKDB_RESULT_TYPE_QUERY_RESULT);
 	REQUIRE(duckdb_param_type(stmt, 2) == DUCKDB_TYPE_INTEGER);
 	REQUIRE(duckdb_bind_null(stmt, 1) == DuckDBSuccess);
 	REQUIRE(duckdb_bind_int32(stmt, 2, 10) == DuckDBSuccess);
@@ -536,6 +539,7 @@ TEST_CASE("Test transaction statement type (rollback)", "[capi]") {
 
 	REQUIRE(duckdb_prepare(conn, "BEGIN", &stmt) == DuckDBSuccess);
 	REQUIRE(duckdb_prepared_transaction_type(stmt) == DUCKDB_TRANSACTION_TYPE_BEGIN);
+	REQUIRE(duckdb_prepared_statement_result_type(stmt) == DUCKDB_RESULT_TYPE_NOTHING);
 	REQUIRE(duckdb_execute_prepared(stmt, &res) == DuckDBSuccess);
 
 	duckdb_destroy_result(&res);

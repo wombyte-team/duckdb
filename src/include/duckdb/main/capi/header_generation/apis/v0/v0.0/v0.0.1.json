@@ -52,6 +52,7 @@
         "duckdb_param_type",
         "duckdb_clear_bindings",
         "duckdb_prepared_statement_type",
+        "duckdb_prepared_statement_result_type",
         "duckdb_prepared_transaction_type",
         "duckdb_prepared_column_count",
         "duckdb_prepared_column_name",

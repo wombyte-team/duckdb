@@ -60,6 +60,7 @@ typedef struct {
 	duckdb_type (*duckdb_param_type)(duckdb_prepared_statement prepared_statement, idx_t param_idx);
 	duckdb_state (*duckdb_clear_bindings)(duckdb_prepared_statement prepared_statement);
 	duckdb_statement_type (*duckdb_prepared_statement_type)(duckdb_prepared_statement statement);
+	duckdb_result_type (*duckdb_prepared_statement_result_type)(duckdb_prepared_statement statement);
 	duckdb_transaction_type (*duckdb_prepared_transaction_type)(duckdb_prepared_statement statement);
 	idx_t (*duckdb_prepared_column_count)(duckdb_prepared_statement prepared_statement);
 	const char *(*duckdb_prepared_column_name)(duckdb_prepared_statement prepared_statement, idx_t col);
@@ -485,6 +486,7 @@ inline duckdb_ext_api_v0 CreateAPIv0() {
 	result.duckdb_param_type = duckdb_param_type;
 	result.duckdb_clear_bindings = duckdb_clear_bindings;
 	result.duckdb_prepared_statement_type = duckdb_prepared_statement_type;
+	result.duckdb_prepared_statement_result_type = duckdb_prepared_statement_result_type;
 	result.duckdb_prepared_transaction_type = duckdb_prepared_transaction_type;
 	result.duckdb_prepared_column_count = duckdb_prepared_column_count;
 	result.duckdb_prepared_column_name = duckdb_prepared_column_name;

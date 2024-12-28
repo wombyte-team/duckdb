@@ -415,6 +415,24 @@ duckdb_statement_type duckdb_prepared_statement_type(duckdb_prepared_statement s
 	return StatementTypeToC(stmt->statement->GetStatementType());
 }
 
+duckdb_result_type duckdb_prepared_statement_result_type(duckdb_prepared_statement statement) {
+	if (!statement) {
+		return DUCKDB_RESULT_TYPE_INVALID;
+	}
+
+	auto stmt = reinterpret_cast<PreparedStatementWrapper *>(statement);
+	auto stmt_data = stmt->statement->data.get();
+	if (stmt_data->properties.return_type == duckdb::StatementReturnType::QUERY_RESULT) {
+		return DUCKDB_RESULT_TYPE_QUERY_RESULT;
+	}
+
+	if (stmt_data->properties.return_type == duckdb::StatementReturnType::CHANGED_ROWS) {
+		return DUCKDB_RESULT_TYPE_CHANGED_ROWS;
+	}
+
+	return DUCKDB_RESULT_TYPE_NOTHING;
+}
+
 duckdb_transaction_type duckdb_prepared_transaction_type(duckdb_prepared_statement statement) {
 	if (!statement) {
 		return DUCKDB_TRANSACTION_TYPE_INVALID;

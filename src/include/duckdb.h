@@ -1507,6 +1507,14 @@ Returns the statement type of the statement to be executed
 DUCKDB_API duckdb_statement_type duckdb_prepared_statement_type(duckdb_prepared_statement statement);
 
 /*!
+Returns the result type of the statement
+
+* @param statement The prepared statement.
+* @return duckdb_result_type value or DUCKDB_RESULT_TYPE_INVALID
+*/
+DUCKDB_API duckdb_result_type duckdb_prepared_statement_result_type(duckdb_prepared_statement statement);
+
+/*!
 Returns the transaction type of the statement to be executed
 
 * @param statement The prepared statement.

@@ -122,6 +122,7 @@ typedef struct {
 	duckdb_type (*duckdb_param_type)(duckdb_prepared_statement prepared_statement, idx_t param_idx);
 	duckdb_state (*duckdb_clear_bindings)(duckdb_prepared_statement prepared_statement);
 	duckdb_statement_type (*duckdb_prepared_statement_type)(duckdb_prepared_statement statement);
+	duckdb_result_type (*duckdb_prepared_statement_result_type)(duckdb_prepared_statement statement);
 	duckdb_transaction_type (*duckdb_prepared_transaction_type)(duckdb_prepared_statement statement);
 	idx_t (*duckdb_prepared_column_count)(duckdb_prepared_statement prepared_statement);
 	const char *(*duckdb_prepared_column_name)(duckdb_prepared_statement prepared_statement, idx_t col);
@@ -582,6 +583,7 @@ typedef struct {
 #define duckdb_param_type                              duckdb_ext_api.duckdb_param_type
 #define duckdb_clear_bindings                          duckdb_ext_api.duckdb_clear_bindings
 #define duckdb_prepared_statement_type                 duckdb_ext_api.duckdb_prepared_statement_type
+#define duckdb_prepared_statement_result_type          duckdb_ext_api.duckdb_prepared_statement_result_type
 #define duckdb_prepared_transaction_type               duckdb_ext_api.duckdb_prepared_transaction_type
 #define duckdb_prepared_column_name                    duckdb_ext_api.duckdb_prepared_column_name
 #define duckdb_prepared_column_logical_type            duckdb_ext_api.duckdb_prepared_column_logical_type
