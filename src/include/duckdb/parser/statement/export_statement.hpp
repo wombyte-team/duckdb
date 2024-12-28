@@ -24,6 +24,10 @@ public:
 	unique_ptr<CopyInfo> info;
 	string database;
 
+	bool IsTemporaryExport() const {
+		return database == TEMP_CATALOG;
+	}
+
 protected:
 	ExportStatement(const ExportStatement &other);
 

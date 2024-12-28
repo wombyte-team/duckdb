@@ -19,7 +19,7 @@ unique_ptr<SQLStatement> ExportStatement::Copy() const {
 string ExportStatement::ToString() const {
 	string result = "EXPORT";
 
-	if (info->temporary) {
+	if (IsTemporaryExport()) {
 		result += " SESSION";
 	} else {
 		result += " DATABASE";

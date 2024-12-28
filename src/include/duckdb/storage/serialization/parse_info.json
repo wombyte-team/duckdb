@@ -432,11 +432,6 @@
         "id": 208,
         "name": "select_statement",
         "type": "QueryNode*"
-      },
-      {
-        "id": 209,
-        "name": "temporary",
-        "type": "bool"
       }
     ]
   },

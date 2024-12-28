@@ -199,7 +199,7 @@ BoundStatement Binder::Bind(ExportStatement &stmt) {
 	for (auto &t : tables) {
 		auto &table = t.get().Cast<TableCatalogEntry>();
 
-		if (stmt.info->temporary && table.GetInfo()->temporary == false) {
+		if (stmt.IsTemporaryExport() && table.GetInfo()->temporary == false) {
 			// skip non-temporary tables when exporting temporary tables
 			continue;
 		}

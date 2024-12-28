@@ -22,7 +22,7 @@ public:
 	static constexpr const ParseInfoType TYPE = ParseInfoType::COPY_INFO;
 
 public:
-	CopyInfo() : ParseInfo(TYPE), catalog(INVALID_CATALOG), schema(DEFAULT_SCHEMA), temporary(false) {
+	CopyInfo() : ParseInfo(TYPE), catalog(INVALID_CATALOG), schema(DEFAULT_SCHEMA) {
 	}
 
 	//! The catalog name to copy to/from
@@ -43,8 +43,6 @@ public:
 	case_insensitive_map_t<vector<Value>> options;
 	// The SQL statement used instead of a table when copying data out to a file
 	unique_ptr<QueryNode> select_statement;
-	//! Whether or not copy temporary entities
-	bool temporary;
 
 public:
 	static string CopyOptionsToString(const string &format, const case_insensitive_map_t<vector<Value>> &options);
@@ -56,6 +54,10 @@ public:
 
 	void Serialize(Serializer &serializer) const override;
 	static unique_ptr<ParseInfo> Deserialize(Deserializer &deserializer);
+
+	bool IsTemporaryCopy() const {
+		return catalog == TEMP_CATALOG;
+	}
 };
 
 } // namespace duckdb

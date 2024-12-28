@@ -285,7 +285,7 @@ SourceResultType PhysicalExport::GetData(ExecutionContext &context, DataChunk &c
 	ExportEntries entries;
 
 	auto schema_list = Catalog::GetSchemas(ccontext, info->catalog);
-	ExtractEntries(context.client, schema_list, entries, info->temporary);
+	ExtractEntries(context.client, schema_list, entries, info->IsTemporaryCopy());
 
 	// consider the order of tables because of foreign key constraint
 	entries.tables.clear();
@@ -311,7 +311,7 @@ SourceResultType PhysicalExport::GetData(ExecutionContext &context, DataChunk &c
 	WriteCatalogEntries(ss, entries.indexes);
 	WriteCatalogEntries(ss, entries.macros);
 
-	if (info->temporary) {
+	if (info->IsTemporaryCopy()) {
 		WriteSessionState(ss, context.client);
 	}
 
