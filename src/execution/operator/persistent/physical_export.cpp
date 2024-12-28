@@ -1,12 +1,13 @@
 #include "duckdb/execution/operator/persistent/physical_export.hpp"
 
-#include "duckdb/main/client_data.hpp"
-#include "duckdb/main/prepared_statement_data.hpp"
 #include "duckdb/catalog/catalog.hpp"
 #include "duckdb/catalog/catalog_entry/schema_catalog_entry.hpp"
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
 #include "duckdb/common/file_system.hpp"
 #include "duckdb/common/string_util.hpp"
+#include "duckdb/main/client_data.hpp"
+#include "duckdb/main/prepared_statement_data.hpp"
+#include "duckdb/main/secret/secret_manager.hpp"
 #include "duckdb/parallel/meta_pipeline.hpp"
 #include "duckdb/parallel/pipeline.hpp"
 #include "duckdb/parser/keyword_helper.hpp"
@@ -57,6 +58,35 @@ static void WriteSessionState(stringstream &ss, ClientContext &client_context) {
 
 	for (auto &item : client_context.config.user_variables) {
 		ss << "SET VARIABLE " << item.first << " TO " << item.second.ToSQLString() << ";\n";
+	}
+
+	auto transaction = CatalogTransaction::GetSystemCatalogTransaction(client_context);
+
+	for (auto &secret : client_context.db.get()->GetSecretManager().AllSecrets(transaction)) {
+		if (secret.persist_type != SecretPersistType::TEMPORARY) {
+			continue;
+		}
+
+		const auto &kv_secret = dynamic_cast<const KeyValueSecret &>(*secret.secret);
+		string name = kv_secret.GetName();
+
+		if (name.empty()) {
+			continue;
+		}
+
+		ss << "CREATE TEMPORARY SECRET " << name << " (TYPE " << kv_secret.GetType();
+		ss << ", PROVIDER " << kv_secret.GetProvider();
+
+		auto scope = kv_secret.GetScope();
+		if (scope.empty() == false) {
+			ss << ", SCOPE ('" << StringUtil::Join(scope, "', '") << "')";
+		}
+
+		for (auto &attr : kv_secret.secret_map) {
+			ss << ", " << attr.first << " " << attr.second.ToSQLString();
+		}
+
+		ss << ");\n";
 	}
 
 	ss << '\n';

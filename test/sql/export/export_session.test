@@ -2,11 +2,49 @@
 # description: Test export temporary database
 # group: [export]
 
+require httpfs
+
+load __TEST_DIR__/export_session.db
+
 statement ok
 SET default_null_order='nulls_first';
 
 statement ok
 BEGIN TRANSACTION
+
+query IIIIIII
+FROM duckdb_secrets()
+
+statement ok
+CREATE TEMPORARY SECRET s1 ( 
+	TYPE S3,
+	KEY_ID 'oneoneone',
+	SECRET 'twotwotwo',
+    SCOPE ('s3://my-bucket', 's3://my-other-bucket')
+);
+
+statement ok
+CREATE SECRET http3 (
+    TYPE HTTP, 
+    EXTRA_HTTP_HEADERS MAP {
+		'Authorization': 'Bearer tooookeeen',
+	}
+);
+
+statement ok
+CREATE PERSISTENT SECRET my_persistent_secret (
+    TYPE S3,
+    KEY_ID 'my_secret_key',
+    SECRET 'my_secret_value'
+);
+
+query IIIIIII
+FROM duckdb_secrets()
+----
+my_persistent_secret	s3	config	true	local_file	[s3://, s3n://, s3a://]	name=my_persistent_secret;type=s3;provider=config;serializable=true;scope=s3://,s3n://,s3a://;key_id=my_secret_key;secret=redacted
+http3	http	config	false	memory	[]	name=http3;type=http;provider=config;serializable=true;scope;extra_http_headers={Authorization=Bearer tooookeeen}
+s1	s3	config	0	memory	[s3://my-bucket, s3://my-other-bucket]	name=s1;type=s3;provider=config;serializable=true;scope=s3://my-bucket,s3://my-other-bucket;key_id=oneoneone;secret=redacted
+
 
 statement ok
 CREATE TEMP TABLE integers(i INTEGER, j INTEGER, CHECK(i+j<10))
@@ -157,12 +195,22 @@ SELECT getvariable('animals')
 
 # now export the db
 statement ok
-EXPORT SESSION '__TEST_DIR__/export_session' (FORMAT CSV)
+EXPORT SESSION '__TEST_DIR__/session_dump' (FORMAT CSV)
 
 statement ok
 COMMIT
 
+######
+
+restart
+
 reconnect
+
+query IIIIIII
+FROM duckdb_secrets()
+----
+my_persistent_secret	s3	config	true	local_file	[s3://, s3n://, s3a://]	name=my_persistent_secret;type=s3;provider=config;serializable=true;scope=s3://,s3n://,s3a://;key_id=my_secret_key;secret=redacted
+
 
 query I
 SELECT getvariable('animals')
@@ -170,7 +218,15 @@ SELECT getvariable('animals')
 NULL
 
 statement ok
-IMPORT DATABASE '__TEST_DIR__/export_session'
+IMPORT DATABASE '__TEST_DIR__/session_dump'
+
+query IIIIIII
+FROM duckdb_secrets()
+----
+my_persistent_secret	s3	config	true	local_file	[s3://, s3n://, s3a://]	name=my_persistent_secret;type=s3;provider=config;serializable=true;scope=s3://,s3n://,s3a://;key_id=my_secret_key;secret=redacted
+http3	http	config	false	memory	[]	name=http3;type=http;provider=config;serializable=true;scope;extra_http_headers={Authorization=Bearer tooookeeen}
+s1	s3	config	0	memory	[s3://my-bucket, s3://my-other-bucket]	name=s1;type=s3;provider=config;serializable=true;scope=s3://my-bucket,s3://my-other-bucket;key_id=oneoneone;secret=redacted
+
 
 query I
 SELECT 20 + getvariable('my_var') AS total;

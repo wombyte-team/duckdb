@@ -1567,6 +1567,21 @@ string Value::ToSQLString() const {
 		ret += "]";
 		return ret;
 	}
+	case LogicalTypeId::MAP: {
+		string ret = "MAP {";
+		auto &map_values = MapValue::GetChildren(*this);
+		for (idx_t i = 0; i < map_values.size(); i++) {
+			auto &child = map_values[i];
+			auto &children = StructValue::GetChildren(child);
+			D_ASSERT(children.size() == 2);
+			ret +="'" + children[0].ToString() + "': " + children[1].ToSQLString();
+			if (i < map_values.size() - 1) {
+				ret += ", ";
+			}
+		}
+		ret += "}";
+		return ret;
+	}
 	default:
 		return ToString();
 	}
