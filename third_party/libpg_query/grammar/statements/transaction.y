@@ -56,5 +56,9 @@ opt_transaction:	WORK							{}
 opt_transaction_type:
 			  READ_P ONLY							{ $$ = PG_TRANS_TYPE_READ_ONLY; }
 			| READ_P WRITE_P						{ $$ = PG_TRANS_TYPE_READ_WRITE; }
+			| ISOLATION LEVEL SERIALIZABLE          { $$ = PG_TRANS_TYPE_DEFAULT; }
+			| ISOLATION LEVEL REPEATABLE READ_P     { $$ = PG_TRANS_TYPE_DEFAULT; }
+			| ISOLATION LEVEL READ_P COMMITTED      { $$ = PG_TRANS_TYPE_DEFAULT; }
+			| ISOLATION LEVEL READ_P UNCOMMITTED    { $$ = PG_TRANS_TYPE_DEFAULT; }
 			| /*EMPTY*/								{ $$ = PG_TRANS_TYPE_DEFAULT; }
 		;
