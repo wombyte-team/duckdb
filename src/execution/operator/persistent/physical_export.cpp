@@ -50,8 +50,7 @@ static bool CheckPreparedStatement(ClientContext &client_context, PreparedStatem
 	try {
 		Planner prepared_planner(client_context);
 
-		prepared_planner.CreatePlan(
-			prepared_statement.unbound_statement->Copy());
+		prepared_planner.CreatePlan(prepared_statement.unbound_statement->Copy());
 
 		return true;
 	} catch (...) {
