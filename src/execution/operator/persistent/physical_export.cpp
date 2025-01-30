@@ -2,7 +2,6 @@
 
 #include "duckdb/catalog/catalog.hpp"
 #include "duckdb/catalog/catalog_entry/schema_catalog_entry.hpp"
-#include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
 #include "duckdb/common/file_system.hpp"
 #include "duckdb/common/string_util.hpp"
 #include "duckdb/main/client_data.hpp"
@@ -11,7 +10,7 @@
 #include "duckdb/parallel/meta_pipeline.hpp"
 #include "duckdb/parallel/pipeline.hpp"
 #include "duckdb/parser/keyword_helper.hpp"
-#include "duckdb/transaction/transaction.hpp"
+#include "duckdb/planner/planner.hpp"
 
 #include <algorithm>
 #include <sstream>
@@ -47,13 +46,27 @@ static void WriteCatalogEntries(stringstream &ss, catalog_entry_vector_t &entrie
 	ss << '\n';
 }
 
+static bool CheckPreparedStatement(ClientContext &client_context, PreparedStatementData &prepared_statement) {
+	try {
+		Planner prepared_planner(client_context);
+
+		prepared_planner.CreatePlan(
+			prepared_statement.unbound_statement->Copy());
+
+		return true;
+	} catch (...) {
+		return false;
+	}
+}
+
 static void WriteSessionState(stringstream &ss, ClientContext &client_context) {
 
 	for (auto &item : client_context.client_data->prepared_statements) {
 		auto prepared_statement = item.second.get();
-		auto unbound_statement = prepared_statement->unbound_statement.get();
 
-		ss << "PREPARE " << item.first << " AS " << unbound_statement->ToString() << ";\n";
+		if (CheckPreparedStatement(client_context, *prepared_statement)) {
+			ss << "PREPARE " << item.first << " AS " << prepared_statement->unbound_statement->ToString() << ";\n";
+		}
 	}
 
 	for (auto &item : client_context.config.user_variables) {

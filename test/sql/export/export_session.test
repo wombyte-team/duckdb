@@ -135,6 +135,7 @@ statement ok
 CREATE TEMP TABLE table01(i INTEGER, j INTEGER);
 CREATE TABLE s1.table01(i INTEGER, j INTEGER);
 CREATE TABLE s2.table01(i INTEGER, j INTEGER);
+CREATE TABLE table02(i INTEGER, j INTEGER);
 
 statement ok
 INSERT INTO table01 VALUES (1, 1), (2, 2);
@@ -167,10 +168,25 @@ statement ok
 PREPARE p1 AS INSERT INTO table01 VALUES ($1, $2)
 
 statement ok
+PREPARE p2 AS INSERT INTO table02 VALUES ($1, $2)
+
+statement ok
 PREPARE s1p1 AS INSERT INTO s1.table01 VALUES ($1, $2)
 
 statement ok
 EXECUTE p1(3, 3)
+
+statement ok
+EXECUTE p2(3, 3)
+
+statement ok
+DROP TABLE table02
+
+statement error
+EXECUTE p2(4, 4)
+----
+Catalog Error: Table with name table02 does not exist!
+Did you mean "export_session.table02"?
 
 statement ok
 SET VARIABLE my_var = 30;
@@ -294,6 +310,11 @@ SELECT nextval('seq')
 
 statement ok
 EXECUTE p1(4, 4)
+
+statement error
+EXECUTE p2(4, 4)
+----
+Binder Error: Prepared statement "p2" does not exist
 
 query II
 SELECT * FROM table01 ORDER BY i;
